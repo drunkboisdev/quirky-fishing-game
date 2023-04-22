@@ -1,5 +1,6 @@
 "use strict"
 
+const internalVer = "2023.04.22.1"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
@@ -238,18 +239,17 @@ function init() {
         fishList.set("perch", lastSavedPerch)
     }
     if (lastSavedShrimp !== "") {
-        fishList.set("perch", lastSavedShrimp)
+        fishList.set("shrimp", lastSavedShrimp)
     }
     if (lastSavedCatfish !== "") {
-        fishList.set("perch", lastSavedCatfish)
+        fishList.set("catfish", lastSavedCatfish)
     }
     if (lastSavedWhitefish !== "") {
-        fishList.set("perch", lastSavedWhitefish)
+        fishList.set("whitefish", lastSavedWhitefish)
     }
     if (lastSavedWalleye !== "") {
-        fishList.set("perch", lastSavedWalleye)
+        fishList.set("walleye", lastSavedWalleye)
     }
-    updateFishList()
 
     // other stuff yknow
     $("toolName").innerHTML = tools[curTool].name
@@ -258,7 +258,5 @@ function init() {
     $("toolAvgCatch").innerHTML = `${tools[curTool].catchRange / 2 + tools[curTool].minCatch} fish caught on average`
     $("toolFishPerSec").innerHTML = `${1 / tools[curTool].cooldown * (tools[curTool].catchRange / 2 + tools[curTool].minCatch)} fish/s`
 
-    fishList.forEach((v, k) => {
-        $("fishList").innerHTML += `<li>${v} ${k}</li>`
-    })
+    updateFishList()
 }

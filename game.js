@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.22.4"
+const internalVer = "2023.04.22.5"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
@@ -128,6 +128,18 @@ document.addEventListener("keydown", e => {
         setCookie("catfish", fishList.get("catfish"))
         setCookie("whitefish", fishList.get("whitefish"))
         setCookie("walleye", fishList.get("walleye"))
+
+        const div = document.createElement("div")
+        div.style.position = "absolute"
+        div.style.top = "25%"
+        div.style.left = "50%"
+        div.style.transform = "translate(-50%,-50%)"
+        div.style.border = "1px solid black"
+        div.style.padding = "0px 8px"
+        div.style.backgroundColor = "white"
+        div.innerHTML = "<p>Game saved!<p>"
+        document.querySelector("body").appendChild(div)
+        setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
     }
 })
 

@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.22.1"
+const internalVer = "2023.04.22.2"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()

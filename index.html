@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>quirky fishing game</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body id="bg" onload=init()>
+
+    <div class="leftBar">
+        <div class="fishInfo">
+            <h1>Fish</h1>
+            <button onclick=sell()>Sell fish</button>
+            <p id="timer">Ready to cast!</p>
+            <p id="catch"></p>
+            <p>Your fish</p>
+            <div class="fishList">
+                <ul id="fishList"></ul>
+                <ul class="newFish" id="addFish"></ul>
+            </div>
+            <br>
+            <p id="moneyGain"></p>
+            <p id="money">You have $0</p>
+        </div>
+        <div class="toolInfo">
+            <h1 id="toolName"></h1>
+            <p id="toolPower"></p>
+            <p id="toolCooldown"></p>
+            <p id="toolAvgCatch"></p>
+            <p id="toolFishPerSec"></p>
+        </div>
+    </div>
+    <img class="pond" onclick=fish() src="assets/pond.png">
+    <img class="rod" src="assets/rod.png">
+    </body>
+    <script src="game.js"></script>
+</html>

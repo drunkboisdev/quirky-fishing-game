@@ -1,0 +1,63 @@
+body {
+    margin: 0 0;
+    padding: 0 0;
+    font-family: "Calibri";
+    height: 100%;
+}
+
+button {
+    padding: 15px 32px;
+}
+
+.hd {
+    visibility: hidden;
+}
+
+.invis {
+    font-size: 0;
+}
+
+.pond {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.rod {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-20%, -100%);
+    visibility: hidden;
+}
+
+.leftBar {
+    display: flexbox;
+    flex-direction: column;
+    width: 35vw;
+    height: 100vh;
+    border: 1px solid #aaaaaa;
+    box-sizing: border-box;
+}
+
+.fishInfo {
+    height: 66%;
+    border-bottom: 1px solid #aaaaaa;
+    padding-left: 12px;
+}
+
+.toolInfo {
+    padding-left: 12px;
+}
+
+.fishList {
+    display: flex;
+    position: relative;
+    bottom: 16px;
+}
+
+.newFish {
+    color: #11aa66;
+    list-style-type: "+  ";
+}

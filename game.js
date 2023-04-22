@@ -67,6 +67,8 @@ fishList.set("walleye", 0)
 
 function $(m) { return document.getElementById(m) }
 
+function wipeSave() { document.cookies = "money=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; perch=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; shrimp=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; catfish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; whitefish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; walleye=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" }
+
 function setCookie(name, value) {
     const d = new Date()
     d.setTime(d.getTime() + 31536000000) // saving this for a year

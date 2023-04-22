@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.22.2"
+const internalVer = "2023.04.22.4"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
@@ -74,7 +74,6 @@ function setCookie(name, value) {
     const d = new Date()
     d.setTime(d.getTime() + 31536000000) // saving this for a year
     document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`
-    console.log(`${name}=${value};expires=${d.toUTCString()};path=/`)
 }
 
 function getCookie(name) {
@@ -90,6 +89,34 @@ function getCookie(name) {
         }
     }
     return ""
+}
+
+function loadSave() { // i don't think this is the best way to do this but i'm tired so whatever
+    const lastSavedMoney = getCookie("money")
+    const lastSavedPerch = getCookie("perch")
+    const lastSavedShrimp = getCookie("shrimp")
+    const lastSavedCatfish = getCookie("catfish")
+    const lastSavedWhitefish = getCookie("whitefish")
+    const lastSavedWalleye = getCookie("walleye")
+    if (lastSavedMoney !== "") {
+        money = Number.parseInt(lastSavedMoney)
+        $("money").innerHTML = `You have $${money}`
+    }
+    if (lastSavedPerch !== "") {
+        fishList.set("perch", Number.parseInt(lastSavedPerch))
+    }
+    if (lastSavedShrimp !== "") {
+        fishList.set("shrimp", Number.parseInt(lastSavedShrimp))
+    }
+    if (lastSavedCatfish !== "") {
+        fishList.set("catfish", Number.parseInt(lastSavedCatfish))
+    }
+    if (lastSavedWhitefish !== "") {
+        fishList.set("whitefish", Number.parseInt(lastSavedWhitefish))
+    }
+    if (lastSavedWalleye !== "") {
+        fishList.set("walleye", Number.parseInt(lastSavedWalleye))
+    }
 }
 
 document.addEventListener("keydown", e => {
@@ -227,34 +254,8 @@ function sell() {
 }
 
 function init() {
-    // load save data
-    const lastSavedMoney = getCookie("money")
-    const lastSavedPerch = getCookie("perch")
-    const lastSavedShrimp = getCookie("shrimp")
-    const lastSavedCatfish = getCookie("catfish")
-    const lastSavedWhitefish = getCookie("whitefish")
-    const lastSavedWalleye = getCookie("walleye")
-    if (lastSavedMoney !== "") {
-        money = Number.parseInt(lastSavedMoney)
-        $("money").innerHTML = `You have $${money}`
-    }
-    if (lastSavedPerch !== "") {
-        fishList.set("perch", Number.parseInt(lastSavedPerch))
-    }
-    if (lastSavedShrimp !== "") {
-        fishList.set("shrimp", Number.parseInt(lastSavedShrimp))
-    }
-    if (lastSavedCatfish !== "") {
-        fishList.set("catfish", Number.parseInt(lastSavedCatfish))
-    }
-    if (lastSavedWhitefish !== "") {
-        fishList.set("whitefish", Number.parseInt(lastSavedWhitefish))
-    }
-    if (lastSavedWalleye !== "") {
-        fishList.set("walleye", Number.parseInt(lastSavedWalleye))
-    }
+    loadSave()
 
-    // other stuff yknow
     $("toolName").innerHTML = tools[curTool].name
     $("toolPower").innerHTML = `${tools[curTool].rollRange / 2 + tools[curTool].minRoll} fishing power`
     $("toolCooldown").innerHTML = `${tools[curTool].cooldown}s cooldown`

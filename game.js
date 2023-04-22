@@ -67,6 +67,7 @@ fishList.set("walleye", 0)
 
 function $(m) { return document.getElementById(m) }
 
+// doesn't work for whatever reason
 function wipeSave() { document.cookies = "money=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; perch=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; shrimp=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; catfish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; whitefish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; walleye=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" }
 
 function setCookie(name, value) {
@@ -227,30 +228,30 @@ function sell() {
 
 function init() {
     // load save data
-    const lastSavedMoney = Number.parseInt(getCookie("money"))
-    const lastSavedPerch = Number.parseInt(getCookie("perch"))
-    const lastSavedShrimp = Number.parseInt(getCookie("shrimp"))
-    const lastSavedCatfish = Number.parseInt(getCookie("catfish"))
-    const lastSavedWhitefish = Number.parseInt(getCookie("whitefish"))
-    const lastSavedWalleye = Number.parseInt(getCookie("walleye"))
+    const lastSavedMoney = getCookie("money")
+    const lastSavedPerch = getCookie("perch")
+    const lastSavedShrimp = getCookie("shrimp")
+    const lastSavedCatfish = getCookie("catfish")
+    const lastSavedWhitefish = getCookie("whitefish")
+    const lastSavedWalleye = getCookie("walleye")
     if (lastSavedMoney !== "") {
-        money = lastSavedMoney
+        money = Number.parseInt(lastSavedMoney)
         $("money").innerHTML = `You have $${money}`
     }
     if (lastSavedPerch !== "") {
-        fishList.set("perch", lastSavedPerch)
+        fishList.set("perch", Number.parseInt(lastSavedPerch))
     }
     if (lastSavedShrimp !== "") {
-        fishList.set("shrimp", lastSavedShrimp)
+        fishList.set("shrimp", Number.parseInt(lastSavedShrimp))
     }
     if (lastSavedCatfish !== "") {
-        fishList.set("catfish", lastSavedCatfish)
+        fishList.set("catfish", Number.parseInt(lastSavedCatfish))
     }
     if (lastSavedWhitefish !== "") {
-        fishList.set("whitefish", lastSavedWhitefish)
+        fishList.set("whitefish", Number.parseInt(lastSavedWhitefish))
     }
     if (lastSavedWalleye !== "") {
-        fishList.set("walleye", lastSavedWalleye)
+        fishList.set("walleye", Number.parseInt(lastSavedWalleye))
     }
 
     // other stuff yknow

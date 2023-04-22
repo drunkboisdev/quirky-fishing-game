@@ -208,7 +208,7 @@ function sell() {
     const moneyBefore = money
     money += sumFishSell()
     if (money === moneyBefore) {
-        $("money").innerHTML = "You don't have any fish to sell."
+        $("moneyGain").innerHTML = "You don't have any fish to sell."
         return
     }
     $("moneyGain").innerHTML = `You sold ${sumFish()} fish to earn $${sumFishSell()}!`
@@ -223,12 +223,35 @@ function sell() {
 }
 
 function init() {
-    let lastSavedMoney = Number.parseInt(getCookie("money"))
+    // load save data
+    const lastSavedMoney = Number.parseInt(getCookie("money"))
+    const lastSavedPerch = Number.parseInt(getCookie("perch"))
+    const lastSavedShrimp = Number.parseInt(getCookie("shrimp"))
+    const lastSavedCatfish = Number.parseInt(getCookie("catfish"))
+    const lastSavedWhitefish = Number.parseInt(getCookie("whitefish"))
+    const lastSavedWalleye = Number.parseInt(getCookie("walleye"))
     if (lastSavedMoney !== "") {
         money = lastSavedMoney
         $("money").innerHTML = `You have $${money}`
     }
+    if (lastSavedPerch !== "") {
+        fishList.set("perch", lastSavedPerch)
+    }
+    if (lastSavedShrimp !== "") {
+        fishList.set("perch", lastSavedShrimp)
+    }
+    if (lastSavedCatfish !== "") {
+        fishList.set("perch", lastSavedCatfish)
+    }
+    if (lastSavedWhitefish !== "") {
+        fishList.set("perch", lastSavedWhitefish)
+    }
+    if (lastSavedWalleye !== "") {
+        fishList.set("perch", lastSavedWalleye)
+    }
+    updateFishList()
 
+    // other stuff yknow
     $("toolName").innerHTML = tools[curTool].name
     $("toolPower").innerHTML = `${tools[curTool].rollRange / 2 + tools[curTool].minRoll} fishing power`
     $("toolCooldown").innerHTML = `${tools[curTool].cooldown}s cooldown`

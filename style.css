@@ -61,3 +61,13 @@ button {
     color: #11aa66;
     list-style-type: "+  ";
 }
+
+.saveBox {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    padding: 0 8px;
+    background-color: white;
+}

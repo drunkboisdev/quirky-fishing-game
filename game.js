@@ -1,43 +1,31 @@
 "use strict"
 
-const internalVer = "2023.04.22.6"
+const internalVer = "2023.04.23.7"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
 let money = 0
 let textTimer = 0
-let fishes = {
-    perch: {
-        name: "Perch",
-        minXp: 3,
-        xpRange: 1,
-        sellPrice: 2
-    },
-    shrimp: {
-        name: "Shrimp",
-        minXp: 6,
-        xpRange: 2,
-        sellPrice: 5
-    },
-    catfish: {
-        name: "Catfish",
-        minXp: 9,
-        xpRange: 2,
-        sellPrice: 8
-    },
-    whitefish: {
-        name: "Whitefish",
-        minXp: 14,
-        xpRange: 4,
-        sellPrice: 12
-    },
-    walleye: {
-        name: "Walleye",
-        minXp: 16,
-        xpRange: 5,
-        sellPrice: 13
+
+class Fish {
+    constructor(name, minXp, xpRange, sellPrice, quantity) {
+        this.name = name
+        this.minXp = minXp
+        this.xpRange = xpRange
+        this.sellPrice = sellPrice
+        this.quantity = quantity
+    }
+    add(amount) {
+        this.quantity += amount
+        return this.quantity
+    }
+    sell() {
+        const temp = this.quantity
+        this.quantity = 0
+        return temp
     }
 }
+
 let tools = {
     woodenSpear: {
         name: "Wooden Spear",
@@ -45,7 +33,53 @@ let tools = {
         rollRange: 25,
         minCatch: 1,
         catchRange: 1,
-        cooldown: 3
+        cooldown: 8,
+        cost: 0
+    },
+    flintSpear: {
+        name: "Flint Spear",
+        minRoll: 5,
+        rollRange: 75,
+        minCatch: 2,
+        catchRange: 1,
+        cooldown: 7.5,
+        cost: 120
+    },
+    copperSpear: {
+        name: "Copper Spear",
+        minRoll: 15,
+        rollRange: 135,
+        minCatch: 2,
+        catchRange: 2,
+        cooldown: 6,
+        cost: 500
+    },
+    badRod: {
+        name: "Makeshift Rod",
+        minRoll: 10,
+        rollRange: 90,
+        minCatch: 1,
+        catchRange: 2,
+        cooldown: 4,
+        cost: 250
+    },
+    mapleRod: {
+        name: "Maple Rod",
+        minRoll: 25,
+        rollRange: 155,
+        minCatch: 2,
+        catchRange: 1,
+        cooldown: 3.0,
+        cost: 800
+    },
+    bambooRod: {
+        name: "Bamboo Rod",
+        minRoll: 65,
+        rollRange: 335,
+        minCatch: 2,
+        catchRange: 2,
+        cooldown: 3.6,
+        cost: 1500
     },
     devTool: {
         name: "???",
@@ -53,17 +87,18 @@ let tools = {
         rollRange: 300,
         minCatch: 11,
         catchRange: 11,
-        cooldown: 0.2
+        cooldown: 0.2,
+        cost: 64
     }
 }
 let curTool = "devTool"
 const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
 
-fishList.set("perch", 0)
-fishList.set("shrimp", 0)
-fishList.set("catfish", 0)
-fishList.set("whitefish", 0)
-fishList.set("walleye", 0)
+fishList.set("perch", new Fish("Perch", 3, 1, 2, 0))
+fishList.set("shrimp", new Fish("Shrimp", 6, 2, 5, 0))
+fishList.set("catfish", new Fish("Catfish", 9, 2, 8, 0))
+fishList.set("whitefish", new Fish("Whitefish", 14, 4, 12, 0))
+fishList.set("walleye", new Fish("Walleye", 16, 5, 13, 0))
 
 function $(m) { return document.getElementById(m) }
 
@@ -103,19 +138,19 @@ function loadSave() { // i don't think this is the best way to do this but i'm t
         $("money").innerHTML = `You have $${money}`
     }
     if (lastSavedPerch !== "") {
-        fishList.set("perch", Number.parseInt(lastSavedPerch))
+        fishList.get("perch").quantity = Number.parseInt(lastSavedPerch)
     }
     if (lastSavedShrimp !== "") {
-        fishList.set("shrimp", Number.parseInt(lastSavedShrimp))
+        fishList.get("shrimp").quantity = Number.parseInt(lastSavedShrimp)
     }
     if (lastSavedCatfish !== "") {
-        fishList.set("catfish", Number.parseInt(lastSavedCatfish))
+        fishList.get("catfish").quantity = Number.parseInt(lastSavedCatfish)
     }
     if (lastSavedWhitefish !== "") {
-        fishList.set("whitefish", Number.parseInt(lastSavedWhitefish))
+        fishList.get("whitefish").quantity = Number.parseInt(lastSavedWhitefish)
     }
     if (lastSavedWalleye !== "") {
-        fishList.set("walleye", Number.parseInt(lastSavedWalleye))
+        fishList.get("walleye").quantity = Number.parseInt(lastSavedWalleye)
     }
 }
 
@@ -123,11 +158,11 @@ document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
         e.preventDefault()
         setCookie("money", money)
-        setCookie("perch", fishList.get("perch"))
-        setCookie("shrimp", fishList.get("shrimp"))
-        setCookie("catfish", fishList.get("catfish"))
-        setCookie("whitefish", fishList.get("whitefish"))
-        setCookie("walleye", fishList.get("walleye"))
+        setCookie("perch", fishList.get("perch").quantity)
+        setCookie("shrimp", fishList.get("shrimp").quantity)
+        setCookie("catfish", fishList.get("catfish").quantity)
+        setCookie("whitefish", fishList.get("whitefish").quantity)
+        setCookie("walleye", fishList.get("walleye").quantity)
 
         const div = document.createElement("div")
         div.className = "saveBox"
@@ -139,14 +174,14 @@ document.addEventListener("keydown", e => {
 
 function sumFish() {
     let sum = 0
-    fishList.forEach((v) => { sum += v })
+    fishList.forEach((v) => { sum += v.quantity })
     return sum
 }
 
 function sumFishSell() {
     let sum = 0
-    fishList.forEach((v, k) => {
-        sum += fishes[k].sellPrice * v
+    fishList.forEach((v) => {
+        sum += v.sellPrice * v.quantity
     })
     return sum
 }
@@ -173,7 +208,7 @@ function updateFishList() {
     $("fishList").innerHTML = ""
 
     fishList.forEach((v, k) => {
-        $("fishList").innerHTML += `<li>${v} ${k}</li>`
+        $("fishList").innerHTML += `<li>${v.quantity} ${k}</li>`
     })
 }
 
@@ -188,7 +223,7 @@ function catchFish() {
         roll[i] = pickFish(roll[i])
 
         if (roll[i] !== "nothing") {
-            fishList.set(roll[i], fishList.get(roll[i]) + 1)
+            fishList.get(roll[i]).add(1)
         }
     }
     let newFish = [0, 0, 0, 0, 0]
@@ -251,11 +286,11 @@ function sell() {
     $("moneyGain").innerHTML = `You sold ${sumFish()} fish to earn $${sumFishSell()}!`
     $("money").innerHTML = `You have $${money}`
 
-    fishList.set("perch", 0)
-    fishList.set("shrimp", 0)
-    fishList.set("catfish", 0)
-    fishList.set("whitefish", 0)
-    fishList.set("walleye", 0)
+    fishList.get("perch").sell()
+    fishList.get("shrimp").sell()
+    fishList.get("catfish").sell()
+    fishList.get("whitefish").sell()
+    fishList.get("walleye").sell()
     updateFishList()
 }
 

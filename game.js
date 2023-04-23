@@ -1,15 +1,15 @@
 "use strict"
 
-const internalVer = "2023.04.23.7"
+const internalVer = "2023.04.23.8"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
+let toolList = new Map()
 let money = 0
 let textTimer = 0
 
 class Fish {
-    constructor(name, minXp, xpRange, sellPrice, quantity) {
-        this.name = name
+    constructor(minXp, xpRange, sellPrice, quantity) {
         this.minXp = minXp
         this.xpRange = xpRange
         this.sellPrice = sellPrice
@@ -25,80 +25,40 @@ class Fish {
         return temp
     }
 }
-
-let tools = {
-    woodenSpear: {
-        name: "Wooden Spear",
-        minRoll: 0,
-        rollRange: 25,
-        minCatch: 1,
-        catchRange: 1,
-        cooldown: 8,
-        cost: 0
-    },
-    flintSpear: {
-        name: "Flint Spear",
-        minRoll: 5,
-        rollRange: 75,
-        minCatch: 2,
-        catchRange: 1,
-        cooldown: 7.5,
-        cost: 120
-    },
-    copperSpear: {
-        name: "Copper Spear",
-        minRoll: 15,
-        rollRange: 135,
-        minCatch: 2,
-        catchRange: 2,
-        cooldown: 6,
-        cost: 500
-    },
-    badRod: {
-        name: "Makeshift Rod",
-        minRoll: 10,
-        rollRange: 90,
-        minCatch: 1,
-        catchRange: 2,
-        cooldown: 4,
-        cost: 250
-    },
-    mapleRod: {
-        name: "Maple Rod",
-        minRoll: 25,
-        rollRange: 155,
-        minCatch: 2,
-        catchRange: 1,
-        cooldown: 3.0,
-        cost: 800
-    },
-    bambooRod: {
-        name: "Bamboo Rod",
-        minRoll: 65,
-        rollRange: 335,
-        minCatch: 2,
-        catchRange: 2,
-        cooldown: 3.6,
-        cost: 1500
-    },
-    devTool: {
-        name: "???",
-        minRoll: 0,
-        rollRange: 300,
-        minCatch: 11,
-        catchRange: 11,
-        cooldown: 0.2,
-        cost: 64
+class Tool {
+    constructor(name, minRoll, rollRange, minCatch, catchRange, cooldown, cost, owned) {
+        this.name = name
+        this.minRoll = minRoll
+        this.rollRange = rollRange
+        this.minCatch = minCatch
+        this.catchRange = catchRange
+        this.cooldown = cooldown
+        this.cost = cost
+        this.owned = owned
+    }
+    buy() {
+        if (!this.owned && money >= this.cost) {
+            money -= this.cost
+            this.owned = true
+        }
     }
 }
 let curTool = "devTool"
 const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
 
-fishList.set("perch", new Fish("Perch", 3, 1, 2, 0))
-fishList.set("shrimp", new Fish("Shrimp", 6, 2, 5, 0))
-fishList.set("catfish", new Fish("Catfish", 9, 2, 8, 0))
-fishList.set("whitefish", new Fish("Whitefish", 14, 4, 12, 0))
-fishList.set("walleye", new Fish("Walleye", 16, 5, 13, 0))
+fishList.set("perch", new Fish(3, 1, 2, 0))
+fishList.set("shrimp", new Fish(6, 2, 5, 0))
+fishList.set("catfish", new Fish(9, 2, 8, 0))
+fishList.set("whitefish", new Fish(14, 4, 12, 0))
+fishList.set("walleye", new Fish(16, 5, 13, 0))
+
+toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 25, 1, 1, 8, 0, true))
+toolList.set("flintSpear", new Tool("Flint Spear", 5, 75, 2, 1, 7.5, 120, false))
+toolList.set("copperSpear", new Tool("Copper Spear", 15, 135, 2, 2, 6, 500, false))
+toolList.set("badRod", new Tool("Makeshift Rod", 10, 90, 1, 2, 4, 250, false))
+toolList.set("mapleRod", new Tool("Maple Rod", 25, 155, 2, 1, 3.8, 800, false))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 65, 335, 2, 2, 3.6, 1500, false))
+toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, true))
 
 function $(m) { return document.getElementById(m) }
 
@@ -214,12 +174,12 @@ function updateFishList() {
 
 function catchFish() {
     let roll = []
-    let catchAmount = Math.floor(Math.random() * tools[curTool].catchRange + tools[curTool].minCatch + 1)
+    let catchAmount = Math.floor(Math.random() * toolList.get(curTool).catchRange + toolList.get(curTool).minCatch + 1)
     let af = $("addFish")
     af.innerHTML = ""
 
     for (let i = 0; i < catchAmount; i++) {
-        roll.push(Math.floor(Math.random() * tools[curTool].rollRange + tools[curTool].minRoll + 1))
+        roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1))
         roll[i] = pickFish(roll[i])
 
         if (roll[i] !== "nothing") {
@@ -272,7 +232,7 @@ function timer(time) {
 function fish() {
     if (fishingTimer <= 0) {
         catchFish()
-        timer(tools[curTool].cooldown)
+        timer(toolList.get(curTool).cooldown)
     }
 }
 
@@ -297,11 +257,11 @@ function sell() {
 function init() {
     loadSave()
 
-    $("toolName").innerHTML = tools[curTool].name
-    $("toolPower").innerHTML = `${tools[curTool].rollRange / 2 + tools[curTool].minRoll} fishing power`
-    $("toolCooldown").innerHTML = `${tools[curTool].cooldown}s cooldown`
-    $("toolAvgCatch").innerHTML = `${tools[curTool].catchRange / 2 + tools[curTool].minCatch} fish caught on average`
-    $("toolFishPerSec").innerHTML = `${1 / tools[curTool].cooldown * (tools[curTool].catchRange / 2 + tools[curTool].minCatch)} fish/s`
+    $("toolName").innerHTML = toolList.get(curTool).name
+    $("toolPower").innerHTML = `${toolList.get(curTool).rollRange / 2 + toolList.get(curTool).minRoll} fishing power`
+    $("toolCooldown").innerHTML = `${toolList.get(curTool).cooldown}s cooldown`
+    $("toolAvgCatch").innerHTML = `${toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch} fish caught on average`
+    $("toolFishPerSec").innerHTML = `${1 / toolList.get(curTool).cooldown * (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)} fish/s`
 
     updateFishList()
 }

@@ -6,7 +6,7 @@ body {
 }
 
 button {
-    padding: 15px 32px;
+    padding: 15px 24px;
 }
 
 .hd {
@@ -35,7 +35,7 @@ button {
 .leftBar {
     display: flexbox;
     flex-direction: column;
-    width: 35vw;
+    width: 30vw;
     height: 100vh;
     border: 1px solid #aaaaaa;
     box-sizing: border-box;
@@ -49,6 +49,38 @@ button {
 
 .toolInfo {
     padding-left: 12px;
+}
+
+.rightBar {
+    position: absolute;
+    display: flexbox;
+    flex-direction: column;
+    right: 0;
+    top: 0;
+    width: 30vw;
+    height: 100vh;
+    border: 1px solid #aaa;
+    box-sizing: border-box;
+}
+
+.store {
+    height: 66%;
+    border-bottom: 1px solid #aaaaaa;
+    padding-left: 12px;
+}
+
+#research {
+    padding-left: 12px;
+}
+
+.buyCentre {
+    display: flex;
+    width: 80%;
+    padding: 6px;
+    margin: auto;
+    justify-content: space-between;
+    border: 1px solid #aaa;
+    cursor: pointer;
 }
 
 .fishList {

@@ -1,19 +1,23 @@
 "use strict"
 
-const internalVer = "2023.04.23.8"
+const internalVer = "2023.04.23.9"
 let fishingTimer = 0
 let currentFish = ""
 let fishList = new Map()
 let toolList = new Map()
 let money = 0
 let textTimer = 0
+let researchTier = 0
+let researchCentreTier = 0
+let researchXp = 0
 
 class Fish {
-    constructor(minXp, xpRange, sellPrice, quantity) {
+    constructor(minXp, xpRange, sellPrice, quantity, tier) {
         this.minXp = minXp
         this.xpRange = xpRange
         this.sellPrice = sellPrice
         this.quantity = quantity
+        this.tier = tier
     }
     add(amount) {
         this.quantity += amount
@@ -25,8 +29,9 @@ class Fish {
         return temp
     }
 }
+
 class Tool {
-    constructor(name, minRoll, rollRange, minCatch, catchRange, cooldown, cost, owned) {
+    constructor(name, minRoll, rollRange, minCatch, catchRange, cooldown, cost, unlocked, owned) {
         this.name = name
         this.minRoll = minRoll
         this.rollRange = rollRange
@@ -34,6 +39,7 @@ class Tool {
         this.catchRange = catchRange
         this.cooldown = cooldown
         this.cost = cost
+        this.unlocked = unlocked
         this.owned = owned
     }
     buy() {
@@ -43,22 +49,46 @@ class Tool {
         }
     }
 }
+
+class Buyable {
+    constructor(name, cost, buyFunc, owned) {
+        this.name = name
+        this.cost = cost
+        this.buyFunc = buyFunc
+        this.owned = owned
+    }
+    buy() {
+        if (!this.owned && this.cost <= money) {
+            money -= this.cost
+            this.owned = true
+            this.buyFunc()
+        }
+    }
+}
+
 let curTool = "devTool"
 const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
 
-fishList.set("perch", new Fish(3, 1, 2, 0))
-fishList.set("shrimp", new Fish(6, 2, 5, 0))
-fishList.set("catfish", new Fish(9, 2, 8, 0))
-fishList.set("whitefish", new Fish(14, 4, 12, 0))
-fishList.set("walleye", new Fish(16, 5, 13, 0))
+const buyables = [
+    new Buyable("rcTier1", 400, () => {
+        researchCentreTier++
+        showResearch()
+    })
+]
 
-toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 25, 1, 1, 8, 0, true))
-toolList.set("flintSpear", new Tool("Flint Spear", 5, 75, 2, 1, 7.5, 120, false))
-toolList.set("copperSpear", new Tool("Copper Spear", 15, 135, 2, 2, 6, 500, false))
-toolList.set("badRod", new Tool("Makeshift Rod", 10, 90, 1, 2, 4, 250, false))
-toolList.set("mapleRod", new Tool("Maple Rod", 25, 155, 2, 1, 3.8, 800, false))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 65, 335, 2, 2, 3.6, 1500, false))
-toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, true))
+fishList.set("perch", new Fish(3, 1, 2, 0, 1))
+fishList.set("shrimp", new Fish(6, 2, 5, 0, 2))
+fishList.set("catfish", new Fish(9, 2, 8, 0, 3))
+fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
+fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
+
+toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 25, 1, 1, 8, 0, true, true))
+toolList.set("flintSpear", new Tool("Flint Spear", 5, 75, 2, 1, 7.5, 120, true, false))
+toolList.set("copperSpear", new Tool("Copper Spear", 15, 135, 2, 2, 6, 500, false, false))
+toolList.set("badRod", new Tool("Makeshift Rod", 10, 90, 1, 2, 4, 250, false, false))
+toolList.set("mapleRod", new Tool("Maple Rod", 25, 155, 2, 1, 3.8, 800, false, false))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 65, 335, 2, 2, 3.6, 1500, false, false))
+toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true))
 
 function $(m) { return document.getElementById(m) }
 
@@ -114,6 +144,7 @@ function loadSave() { // i don't think this is the best way to do this but i'm t
     }
 }
 
+// SAVING
 document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
         e.preventDefault()
@@ -205,6 +236,15 @@ function catchFish() {
                 newFish[4]++
                 break
         }
+        if (researchCentreTier !== 0 && roll[i] !== "nothing") {
+            researchXp += fishList.get(roll[i]).tier ** 2 + 9 * researchCentreTier ** 3
+
+            if (researchXp >= 4 ** researchTier * 500) {
+                researchXp -= 4 ** researchTier * 500
+                increaseResearchTier()
+            }
+            showResearch()
+        }
     }
     for (let i = 0; i < 5; i++) {
         if (newFish[i] !== 0) {
@@ -252,6 +292,40 @@ function sell() {
     fishList.get("whitefish").sell()
     fishList.get("walleye").sell()
     updateFishList()
+}
+
+function buy(item) {
+    for (let i = 0; i < buyables.length; i++) {
+        if (buyables[i].name === item) {
+            buyables[i].buy()
+        }
+    }
+}
+
+function increaseResearchTier() {
+    researchTier++
+    
+    switch (researchTier) {
+        case 1:
+            toolList.get("copperSpear").unlocked = true
+            break
+        case 2:
+            toolList.get("badRod").unlocked = true
+            toolList.get("mapleRod").unlocked = true
+            toolList.get("bambooRod").unlocked = true
+            break
+    }
+}
+
+function showResearch() {
+    let p = $("researchDisp")
+    if (p === null) {
+        p = document.createElement("p")
+        p.id = "researchDisp"
+        $("research").appendChild(p)
+    }
+    console.log()
+    p.innerHTML = `${researchXp} / ${4 ** researchTier * 500} to next level`
 }
 
 function init() {

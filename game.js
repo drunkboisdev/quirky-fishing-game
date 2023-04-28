@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.28.10"
+const internalVer = "2023.04.28.11"
 let currentFish = ""
 let fishList = new Map()
 let toolList = new Map()
@@ -98,9 +98,10 @@ fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 120, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 500, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 1400, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 220, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
 toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 750, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 1400, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 1450, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
 toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -113,76 +114,6 @@ function findToolName(name) {
 
 function $(m) { return document.getElementById(m) }
 function updateMoney() { $("money").innerHTML = `You have $${money}` }
-
-// doesn't work for whatever reason
-function wipeSave() { document.cookies = "money=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; perch=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; shrimp=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; catfish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; whitefish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; walleye=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" }
-
-function setCookie(name, value) {
-    const d = new Date()
-    d.setTime(d.getTime() + 31536000000) // saving this for a year
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`
-}
-
-function getCookie(name) {
-    const cookie = decodeURIComponent(document.cookie)
-    const ca = cookie.split(";")
-
-    for (let i = 0; i < ca.length; i++) {
-        while (ca[i].charAt(0) === " ") {
-            ca[i] = ca[i].substring(1)
-        }
-        if (ca[i].indexOf(`${name}=`) === 0) {
-            return ca[i].substring(`${name}=`.length, ca[i].length)
-        }
-    }
-    return ""
-}
-
-function loadSave() { // i don't think this is the best way to do this but i'm tired so whatever
-    const lastSavedMoney = getCookie("money")
-    const lastSavedPerch = getCookie("perch")
-    const lastSavedShrimp = getCookie("shrimp")
-    const lastSavedCatfish = getCookie("catfish")
-    const lastSavedWhitefish = getCookie("whitefish")
-    const lastSavedWalleye = getCookie("walleye")
-    if (lastSavedMoney !== "") {
-        money = Number.parseInt(lastSavedMoney)
-    }
-    if (lastSavedPerch !== "") {
-        fishList.get("perch").quantity = Number.parseInt(lastSavedPerch)
-    }
-    if (lastSavedShrimp !== "") {
-        fishList.get("shrimp").quantity = Number.parseInt(lastSavedShrimp)
-    }
-    if (lastSavedCatfish !== "") {
-        fishList.get("catfish").quantity = Number.parseInt(lastSavedCatfish)
-    }
-    if (lastSavedWhitefish !== "") {
-        fishList.get("whitefish").quantity = Number.parseInt(lastSavedWhitefish)
-    }
-    if (lastSavedWalleye !== "") {
-        fishList.get("walleye").quantity = Number.parseInt(lastSavedWalleye)
-    }
-}
-
-// SAVING
-document.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
-        e.preventDefault()
-        setCookie("money", money)
-        setCookie("perch", fishList.get("perch").quantity)
-        setCookie("shrimp", fishList.get("shrimp").quantity)
-        setCookie("catfish", fishList.get("catfish").quantity)
-        setCookie("whitefish", fishList.get("whitefish").quantity)
-        setCookie("walleye", fishList.get("walleye").quantity)
-
-        const div = document.createElement("div")
-        div.className = "saveBox"
-        div.innerHTML = "<p>Game saved!<p>"
-        document.querySelector("body").appendChild(div)
-        setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
-    }
-})
 
 function sumFish() {
     let sum = 0
@@ -333,7 +264,7 @@ function buy(item) {
 
 function changeShop(tab) {
     const t = document.getElementsByClassName("storeTab")
-    console.log("shup")
+
     for (let i = 0; i < t.length; i++) {
         t[i].style.display = "none"
     }
@@ -351,6 +282,15 @@ function increaseResearchTier() {
             toolList.get("badRod").unlock()
             toolList.get("mapleRod").unlock()
             toolList.get("bambooRod").unlock()
+
+            const div = document.createElement("div")
+            div.innerHTML = "Rods"
+            div.id = "rods"
+            div.addEventListener("click", () => (changeShop("rodContent")))
+            document.getElementsByClassName("storeTabs")[0].appendChild(div)
+            break
+        case 3:
+            toolList.get("bronzeSpear").unlock()
             break
     }
 }
@@ -391,3 +331,73 @@ function init() {
     updateFishList()
     updateMoney()
 }
+
+// doesn't work for whatever reason
+function wipeSave() { document.cookies = "money=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; perch=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; shrimp=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; catfish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; whitefish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; walleye=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" }
+
+function setCookie(name, value) {
+    const d = new Date()
+    d.setTime(d.getTime() + 31536000000) // saving this for a year
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`
+}
+
+function getCookie(name) {
+    const cookie = decodeURIComponent(document.cookie)
+    const ca = cookie.split(";")
+
+    for (let i = 0; i < ca.length; i++) {
+        while (ca[i].charAt(0) === " ") {
+            ca[i] = ca[i].substring(1)
+        }
+        if (ca[i].indexOf(`${name}=`) === 0) {
+            return ca[i].substring(`${name}=`.length, ca[i].length)
+        }
+    }
+    return ""
+}
+
+function loadSave() { // i don't think this is the best way to do this but i'm tired so whatever
+    const lastSavedMoney = getCookie("money")
+    const lastSavedPerch = getCookie("perch")
+    const lastSavedShrimp = getCookie("shrimp")
+    const lastSavedCatfish = getCookie("catfish")
+    const lastSavedWhitefish = getCookie("whitefish")
+    const lastSavedWalleye = getCookie("walleye")
+    if (lastSavedMoney !== "") {
+        money = Number.parseInt(lastSavedMoney)
+    }
+    if (lastSavedPerch !== "") {
+        fishList.get("perch").quantity = Number.parseInt(lastSavedPerch)
+    }
+    if (lastSavedShrimp !== "") {
+        fishList.get("shrimp").quantity = Number.parseInt(lastSavedShrimp)
+    }
+    if (lastSavedCatfish !== "") {
+        fishList.get("catfish").quantity = Number.parseInt(lastSavedCatfish)
+    }
+    if (lastSavedWhitefish !== "") {
+        fishList.get("whitefish").quantity = Number.parseInt(lastSavedWhitefish)
+    }
+    if (lastSavedWalleye !== "") {
+        fishList.get("walleye").quantity = Number.parseInt(lastSavedWalleye)
+    }
+}
+
+// SAVING
+document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
+        e.preventDefault()
+        setCookie("money", money)
+        setCookie("perch", fishList.get("perch").quantity)
+        setCookie("shrimp", fishList.get("shrimp").quantity)
+        setCookie("catfish", fishList.get("catfish").quantity)
+        setCookie("whitefish", fishList.get("whitefish").quantity)
+        setCookie("walleye", fishList.get("walleye").quantity)
+
+        const div = document.createElement("div")
+        div.className = "saveBox"
+        div.innerHTML = "<p>Game saved!<p>"
+        document.querySelector("body").appendChild(div)
+        setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
+    }
+})

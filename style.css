@@ -122,6 +122,10 @@ button {
     width: 100%;
 }
 
-.storeTab {
-    position: relative;
+#spears {
+    cursor: pointer;
+}
+
+#rods {
+    cursor: pointer;
 }

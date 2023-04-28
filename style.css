@@ -66,18 +66,18 @@ button {
 .store {
     height: 66%;
     border-bottom: 1px solid #aaaaaa;
-    padding-left: 12px;
 }
 
 #research {
     padding-left: 12px;
 }
 
-.buyCentre {
+.buyButton {
     display: flex;
     width: 80%;
     padding: 6px;
     margin: auto;
+    margin-top: 12px;
     justify-content: space-between;
     border: 1px solid #aaa;
     cursor: pointer;
@@ -102,4 +102,26 @@ button {
     border: 1px solid black;
     padding: 0 8px;
     background-color: white;
+}
+
+.storeTabs {
+    width: 100%;
+    display: flex;
+}
+
+.storeTabs div {
+    width: 50%;
+    border: 1px solid #aaa;
+    border-bottom: none;
+    margin-right: 10px;
+    padding: 6px;
+}
+
+#storeContent {
+    border-top: 1px solid #aaa;
+    width: 100%;
+}
+
+.storeTab {
+    position: relative;
 }

@@ -1,7 +1,7 @@
 "use strict"
 
 const internalVer = "2023.04.29.14"
-let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0
+let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
 
 class Fish {
     constructor(minXp, xpRange, sellPrice, quantity, tier) {
@@ -95,10 +95,10 @@ fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 950, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 960, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
 toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 960, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 950, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
 toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -198,8 +198,8 @@ function catchFish() {
         if (researchCentreTier !== 0 && roll[i] !== "nothing") {
             researchXp += fishList.get(roll[i]).tier ** 2 + 9 * researchCentreTier ** 3
 
-            if (researchXp >= 4 ** researchTier * 500) {
-                researchXp -= 4 ** researchTier * 500
+            if (researchXp >= nextResearchReq) {
+                researchXp -= nextResearchReq
                 increaseResearchTier()
             }
             showResearch()
@@ -273,6 +273,7 @@ function changeShop(tab) {
 
 function increaseResearchTier() {
     researchTier++
+    nextResearchReq *= ((researchTier + 1) * 3 + 1) / researchTier + 1
     
     switch (researchTier) {
         case 1:
@@ -310,7 +311,7 @@ function showResearch() {
         $("research").appendChild(tier)
     }
     
-    p.innerHTML = `${researchXp} / ${4 ** researchTier * 500} to next level`
+    p.innerHTML = `${researchXp} / ${nextResearchReq} to next level`
     tier.innerHTML = `Level ${researchTier}`
 }
 

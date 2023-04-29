@@ -1,10 +1,7 @@
 "use strict"
 
-const internalVer = "2023.04.28.11"
-let currentFish = ""
-let fishList = new Map()
-let toolList = new Map()
-let fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0
+const internalVer = "2023.04.28.12"
+let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0
 
 class Fish {
     constructor(minXp, xpRange, sellPrice, quantity, tier) {
@@ -78,7 +75,7 @@ class Buyable {
     }
 }
 
-let curTool = "devTool"
+let curTool = "woodenSpear"
 const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
 
 const buyables = [
@@ -86,7 +83,7 @@ const buyables = [
         researchCentreTier++
         showResearch()
         document.querySelector("#research .buyButton p[name='price']").innerHTML = "Owned" // this is just an excuse to try using queryselector more
-    })
+    }, false)
 ]
 
 fishList.set("perch", new Fish(3, 1, 2, 0, 1))
@@ -95,7 +92,7 @@ fishList.set("catfish", new Fish(9, 2, 8, 0, 3))
 fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
 fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
 
-toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
+toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 1, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 120, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 500, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
 toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 1400, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
@@ -114,6 +111,8 @@ function findToolName(name) {
 
 function $(m) { return document.getElementById(m) }
 function updateMoney() { $("money").innerHTML = `You have $${money}` }
+function ls(k, v) { localStorage.setItem(k, v) }
+function lg(k) { return localStorage.getItem(k) }
 
 function sumFish() {
     let sum = 0
@@ -131,17 +130,17 @@ function sumFishSell() {
 
 function pickFish(roll) {
     let fish
-    if (roll < 10) {
+    if (roll <= 10) {
         fish = "nothing"
-    } else if (roll < 30) {
+    } else if (roll <= 30) {
         fish = "perch"
-    } else if (roll < 70) {
+    } else if (roll <= 70) {
         fish = "shrimp"
-    } else if (roll < 130) {
+    } else if (roll <= 130) {
         fish = "catfish"
-    } else if (roll < 210) {
+    } else if (roll <= 210) {
         fish = "whitefish"
-    } else if (roll < 310) {
+    } else if (roll <= 310) {
         fish = "walleye"
     }
     return fish
@@ -245,6 +244,7 @@ function sell() {
     }
     $("moneyGain").innerHTML = `You sold ${sumFish()} fish to earn $${sumFishSell()}!`
     $("money").innerHTML = `You have $${money}`
+    $("addFish").innerHTML = ""
 
     fishList.get("perch").sell()
     fishList.get("shrimp").sell()
@@ -287,6 +287,7 @@ function increaseResearchTier() {
             div.innerHTML = "Rods"
             div.id = "rods"
             div.addEventListener("click", () => (changeShop("rodContent")))
+            $("rods").style.display = "none"
             document.getElementsByClassName("storeTabs")[0].appendChild(div)
             break
         case 3:
@@ -332,67 +333,107 @@ function init() {
     updateMoney()
 }
 
-// doesn't work for whatever reason
-function wipeSave() { document.cookies = "money=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; perch=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; shrimp=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; catfish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; whitefish=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; walleye=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" }
+function wipeSave() { localStorage.clear() }
 
-function setCookie(name, value) {
-    const d = new Date()
-    d.setTime(d.getTime() + 31536000000) // saving this for a year
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`
-}
+function loadSave() {
+    const lsMoney = lg("money")
+    const lsRXP = lg("researchXp")
+    const lsRT = lg("researchTier")
+    const lsRC = lg("rcOwned")
+    const lsFlintSpear = lg("flintSpearOwned")
+    const lsCopperSpear = lg("copperSpearOwned")
+    const lsBronzeSpear = lg("bronzeSpearOwned")
+    const lsBadRod = lg("badRodOwned")
+    const lsMapleRod = lg("mapleRodOwned")
+    const lsBambooRod = lg("bambooRodOwned")
+    const lsTool = lg("curTool")
+    const lsPerch = lg("perch")
+    const lsShrimp = lg("shrimp")
+    const lsCatfish = lg("catfish")
+    const lsWhitefish = lg("whitefish")
+    const lsWalleye = lg("walleye")
 
-function getCookie(name) {
-    const cookie = decodeURIComponent(document.cookie)
-    const ca = cookie.split(";")
-
-    for (let i = 0; i < ca.length; i++) {
-        while (ca[i].charAt(0) === " ") {
-            ca[i] = ca[i].substring(1)
+    if (lsMoney !== null) {
+        money = Number.parseInt(lsMoney)
+    }
+    if (lsRXP !== null) {
+        researchXp = Number.parseInt(lsRXP)
+    }
+    if (lsRT !== null) {
+        for (let i = 0; i < Number.parseInt(lsRT); i++) {
+            increaseResearchTier()
         }
-        if (ca[i].indexOf(`${name}=`) === 0) {
-            return ca[i].substring(`${name}=`.length, ca[i].length)
-        }
     }
-    return ""
+    if (lsRC !== null) {
+        buyables[0].owned = (lsRC === "true")
+        if (lsRC === "true") { buyables[0].buyFunc() }
+    }
+    if (lsFlintSpear !== null) {
+        if (lsFlintSpear === "true") { selectTool("flintSpear") }
+        toolList.get("flintSpear").owned = true
+    }
+    if (lsCopperSpear !== null) {
+        if (lsCopperSpear === "true") { selectTool("copperSpear") }
+        toolList.get("copperSpear").owned = true
+    }
+    if (lsBronzeSpear !== null) {
+        if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
+        toolList.get("bronzeSpear").owned = true
+    }
+    if (lsBadRod !== null) {
+        if (lsBadRod === "true") { selectTool("badRod") }
+        toolList.get("badRod").owned = true
+    }
+    if (lsMapleRod !== null) {
+        if (lsMapleRod === "true") { selectTool("mapleRod") }
+        toolList.get("mapleRod").owned = true
+    }
+    if (lsBambooRod !== null) {
+        if (lsBambooRod === "true") { selectTool("bambooRod") }
+        toolList.get("bambooRod").owned = true
+    }
+    if (lsTool !== null) {
+        curTool = lsTool
+        selectTool(curTool)
+    }
+    if (lsPerch !== null) {
+        fishList.get("perch").quantity = Number.parseInt(lsPerch)
+    }
+    if (lsShrimp !== null) {
+        fishList.get("shrimp").quantity = Number.parseInt(lsShrimp)
+    }
+    if (lsCatfish !== null) {
+        fishList.get("catfish").quantity = Number.parseInt(lsCatfish)
+    }
+    if (lsWhitefish !== null) {
+        fishList.get("whitefish").quantity = Number.parseInt(lsWhitefish)
+    }
+    if (lsWalleye !== null) {
+        fishList.get("walleye").quantity = Number.parseInt(lsWalleye)
+    }
 }
 
-function loadSave() { // i don't think this is the best way to do this but i'm tired so whatever
-    const lastSavedMoney = getCookie("money")
-    const lastSavedPerch = getCookie("perch")
-    const lastSavedShrimp = getCookie("shrimp")
-    const lastSavedCatfish = getCookie("catfish")
-    const lastSavedWhitefish = getCookie("whitefish")
-    const lastSavedWalleye = getCookie("walleye")
-    if (lastSavedMoney !== "") {
-        money = Number.parseInt(lastSavedMoney)
-    }
-    if (lastSavedPerch !== "") {
-        fishList.get("perch").quantity = Number.parseInt(lastSavedPerch)
-    }
-    if (lastSavedShrimp !== "") {
-        fishList.get("shrimp").quantity = Number.parseInt(lastSavedShrimp)
-    }
-    if (lastSavedCatfish !== "") {
-        fishList.get("catfish").quantity = Number.parseInt(lastSavedCatfish)
-    }
-    if (lastSavedWhitefish !== "") {
-        fishList.get("whitefish").quantity = Number.parseInt(lastSavedWhitefish)
-    }
-    if (lastSavedWalleye !== "") {
-        fishList.get("walleye").quantity = Number.parseInt(lastSavedWalleye)
-    }
-}
-
-// SAVING
+// basically a save function lmao
 document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
         e.preventDefault()
-        setCookie("money", money)
-        setCookie("perch", fishList.get("perch").quantity)
-        setCookie("shrimp", fishList.get("shrimp").quantity)
-        setCookie("catfish", fishList.get("catfish").quantity)
-        setCookie("whitefish", fishList.get("whitefish").quantity)
-        setCookie("walleye", fishList.get("walleye").quantity)
+
+        ls("money", money)
+        ls("researchXp", researchXp)
+        ls("researchTier", researchTier)
+        ls("rcOwned", buyables[0].owned)
+        ls("flintSpearOwned", toolList.get("flintSpear").owned)
+        ls("copperSpearOwned", toolList.get("copperSpear").owned)
+        ls("bronzeSpearOwned", toolList.get("bronzeSpear").owned)
+        ls("badRodOwned", toolList.get("badRod").owned)
+        ls("mapleRodOwned", toolList.get("mapleRod").owned)
+        ls("bambooRodOwned", toolList.get("bambooRod").owned)
+        ls("curTool", curTool)
+        ls("perch", fishList.get("perch").quantity)
+        ls("shrimp", fishList.get("shrimp").quantity)
+        ls("catfish", fishList.get("catfish").quantity)
+        ls("whitefish", fishList.get("whitefish").quantity)
+        ls("walleye", fishList.get("walleye").quantity)
 
         const div = document.createElement("div")
         div.className = "saveBox"

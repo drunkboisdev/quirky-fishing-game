@@ -67,6 +67,9 @@ button {
     height: 66%;
     border-bottom: 1px solid #aaaaaa;
 }
+.store h1 {
+    margin-left: 12px;
+}
 
 #research {
     padding-left: 12px;
@@ -89,7 +92,7 @@ button {
     bottom: 16px;
 }
 
-.newFish {
+#addFish {
     color: #11aa66;
     list-style-type: "+  ";
 }

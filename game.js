@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.28.13"
+const internalVer = "2023.04.29.14"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0
 
 class Fish {
@@ -68,10 +68,10 @@ class Buyable {
     buy() {
         if (!this.owned && this.cost <= money) {
             money -= this.cost
-            this.owned = true
             updateMoney()
-            this.buyFunc()
         }
+        this.owned = true
+        this.buyFunc()
     }
 }
 
@@ -287,7 +287,7 @@ function increaseResearchTier() {
             div.innerHTML = "Rods"
             div.id = "rods"
             div.addEventListener("click", () => (changeShop("rodContent")))
-            $("rods").style.display = "none"
+            $("rodContent").style.display = "none"
             document.getElementsByClassName("storeTabs")[0].appendChild(div)
             break
         case 3:
@@ -369,24 +369,31 @@ function loadSave() {
         if (lsRC === "true") { buyables[0].buyFunc() }
     }
     if (lsFlintSpear !== null) {
+        toolList.get("flintSpear").owned = (lsFlintSpear === "true")
         if (lsFlintSpear === "true") { selectTool("flintSpear") }
     }
     if (lsCopperSpear !== null) {
+        toolList.get("copperSpear").owned = (lsCopperSpear === "true")
         if (lsCopperSpear === "true") { selectTool("copperSpear") }
     }
     if (lsBronzeSpear !== null) {
+        toolList.get("bronzeSpear").owned = (lsBronzeSpear === "true")
         if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
     }
     if (lsBadRod !== null) {
+        toolList.get("badRod").owned = (lsBadRod === "true")
         if (lsBadRod === "true") { selectTool("badRod") }
     }
     if (lsMapleRod !== null) {
+        toolList.get("mapleRod").owned = (lsMapleRod === "true")
         if (lsMapleRod === "true") { selectTool("mapleRod") }
     }
     if (lsBambooRod !== null) {
+        toolList.get("bambooRod").owned = (lsBambooRod === "true")
         if (lsBambooRod === "true") { selectTool("bambooRod") }
     }
     if (lsTool !== null) {
+        $("woodenSpearPrice").innerHTML = "Owned"
         curTool = lsTool
         selectTool(curTool)
     }
@@ -436,3 +443,22 @@ document.addEventListener("keydown", e => {
         setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
     }
 })
+
+function exampleSave() {
+    ls("money", 10004)
+    ls("researchXp", 156)
+    ls("researchTier", 3)
+    ls("rcOwned", true)
+    ls("flintSpearOwned", true)
+    ls("copperSpearOwned", true)
+    ls("bronzeSpearOwned", true)
+    ls("badRodOwned", false)
+    ls("mapleRodOwned", true)
+    ls("bambooRodOwned", true)
+    ls("curTool", "bambooRod")
+    ls("perch", 0)
+    ls("shrimp", 2)
+    ls("catfish", 14)
+    ls("whitefish", 19)
+    ls("walleye", 0)
+}

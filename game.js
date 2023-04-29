@@ -79,7 +79,7 @@ let curTool = "woodenSpear"
 const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
 
 const buyables = [
-    new Buyable("rcTier1", 400, () => {
+    new Buyable("rcTier1", 300, () => {
         researchCentreTier++
         showResearch()
         document.querySelector("#research .buyButton p[name='price']").innerHTML = "Owned" // this is just an excuse to try using queryselector more

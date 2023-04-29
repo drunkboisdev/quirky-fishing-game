@@ -99,7 +99,7 @@ toolList.set("bronzeSpear", new Tool("Bronze Spear", 50, 300, 4, 1, 5, 1200, fal
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
 toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
 toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 950, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
-toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
+//toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
     for (const [k, v] of toolList) {
@@ -273,7 +273,7 @@ function changeShop(tab) {
 
 function increaseResearchTier() {
     researchTier++
-    nextResearchReq *= ((researchTier + 1) * 3 + 1) / researchTier + 1
+    nextResearchReq *= ((researchTier + 1) * 3 + 1) / (researchTier + 1)
     
     switch (researchTier) {
         case 1:
@@ -445,7 +445,7 @@ document.addEventListener("keydown", e => {
     }
 })
 
-function exampleSave() {
+/*function exampleSave() {
     ls("money", 10004)
     ls("researchXp", 156)
     ls("researchTier", 3)
@@ -462,4 +462,4 @@ function exampleSave() {
     ls("catfish", 14)
     ls("whitefish", 19)
     ls("walleye", 0)
-}
+}*/

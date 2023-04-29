@@ -92,7 +92,7 @@ fishList.set("catfish", new Fish(9, 2, 8, 0, 3))
 fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
 fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
 
-toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 1, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
+toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 120, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 500, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
 toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 1400, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))

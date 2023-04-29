@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.28.12"
+const internalVer = "2023.04.28.13"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0
 
 class Fish {
@@ -93,12 +93,12 @@ fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
 fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
 
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
-toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 120, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
-toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 500, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 1400, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
-toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 220, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
-toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 750, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 1450, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
+toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 40, 250, 3, 2, 5.5, 950, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
+toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 960, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
 toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -370,27 +370,21 @@ function loadSave() {
     }
     if (lsFlintSpear !== null) {
         if (lsFlintSpear === "true") { selectTool("flintSpear") }
-        toolList.get("flintSpear").owned = true
     }
     if (lsCopperSpear !== null) {
         if (lsCopperSpear === "true") { selectTool("copperSpear") }
-        toolList.get("copperSpear").owned = true
     }
     if (lsBronzeSpear !== null) {
         if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
-        toolList.get("bronzeSpear").owned = true
     }
     if (lsBadRod !== null) {
         if (lsBadRod === "true") { selectTool("badRod") }
-        toolList.get("badRod").owned = true
     }
     if (lsMapleRod !== null) {
         if (lsMapleRod === "true") { selectTool("mapleRod") }
-        toolList.get("mapleRod").owned = true
     }
     if (lsBambooRod !== null) {
         if (lsBambooRod === "true") { selectTool("bambooRod") }
-        toolList.get("bambooRod").owned = true
     }
     if (lsTool !== null) {
         curTool = lsTool

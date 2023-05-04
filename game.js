@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "2023.04.29.14"
+const internalVer = "2023.04.29.16"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
 
 class Fish {
@@ -140,7 +140,9 @@ function pickFish(roll) {
         fish = "catfish"
     } else if (roll <= 210) {
         fish = "whitefish"
-    } else if (roll <= 310) {
+    } /*else if (roll <= 310) {
+        fish = "walleye"
+    }*/ else {
         fish = "walleye"
     }
     return fish
@@ -167,6 +169,8 @@ function catchFish() {
     let catchAmount = Math.floor(Math.random() * toolList.get(curTool).catchRange + toolList.get(curTool).minCatch + 1)
     let af = $("addFish")
     af.innerHTML = ""
+
+    document.querySelector("img.rod").src = `assets/tools/${curTool}.png`
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1))

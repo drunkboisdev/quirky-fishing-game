@@ -26,9 +26,8 @@ button {
 
 .rod {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-20%, -100%);
+    top: 120px;
+    left: 216px;
     visibility: hidden;
 }
 

@@ -30,8 +30,15 @@
             <p id="toolFishPerSec"></p>
         </div>
     </div>
-    <img class="pond" onclick=fish() src="assets/pond.png">
-    <img class="rod" src="assets/rod.png">
+    <div class="pond">
+        <img src="assets/lake.png" usemap="#lake">
+        <map name="lake">
+            <area shape="rect" coords="0,48,288,144" href="javascript:fish()">
+            <area shape="rect" coords="48,4,192,192" href="javascript:fish()">
+            <area shape="rect" coords="192,144,240,192" href="javascript:fish()">
+        </map>
+        <img class="rod">
+    </div>
     <div class="rightBar">
         <div class="store">
             <h1>Store</h1>

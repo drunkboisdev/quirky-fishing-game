@@ -1,12 +1,11 @@
 "use strict"
 
-const internalVer = "2023.04.29.16"
+const internalVer = "0.2023.06.XX.02"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
 
 class Fish {
-    constructor(minXp, xpRange, sellPrice, quantity, tier) {
-        this.minXp = minXp
-        this.xpRange = xpRange
+    constructor(xp, sellPrice, quantity, tier) {
+        this.xp = xp
         this.sellPrice = sellPrice
         this.quantity = quantity
         this.tier = tier
@@ -76,7 +75,7 @@ class Buyable {
 }
 
 let curTool = "woodenSpear"
-const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
+const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"]
 
 const buyables = [
     new Buyable("rcTier1", 300, () => {
@@ -86,11 +85,14 @@ const buyables = [
     }, false)
 ]
 
-fishList.set("perch", new Fish(3, 1, 2, 0, 1))
-fishList.set("shrimp", new Fish(6, 2, 5, 0, 2))
-fishList.set("catfish", new Fish(9, 2, 8, 0, 3))
-fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
-fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
+fishList.set("perch", new Fish(3, 2, 0, 1))
+fishList.set("shrimp", new Fish(6, 5, 0, 2))
+fishList.set("catfish", new Fish(10, 8, 0, 3))
+fishList.set("whitefish", new Fish(14, 12, 0, 4))
+fishList.set("walleye", new Fish(19, 13, 0, 5))
+fishList.set("salmon", new Fish(25, 18, 0, 6))
+fishList.set("eel", new Fish(32, 20, 0, 7))
+fishList.set("basa", new Fish(40, 25, 0, 8))
 
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
@@ -140,10 +142,14 @@ function pickFish(roll) {
         fish = "catfish"
     } else if (roll <= 210) {
         fish = "whitefish"
-    } /*else if (roll <= 310) {
+    } else if (roll <= 310) {
         fish = "walleye"
-    }*/ else {
-        fish = "walleye"
+    } else if (roll <= 430) {
+        fish = "salmon"
+    } else if (roll <= 570) {
+        fish = "eel"
+    } else {
+        fish = "basa"
     }
     return fish
 }
@@ -158,7 +164,7 @@ function updateFishList() {
 
 function updateToolInfo() {
     $("toolName").innerHTML = toolList.get(curTool).name
-    $("toolPower").innerHTML = `${+(toolList.get(curTool).rollRange / 2 + toolList.get(curTool).minRoll).toFixed(2)} fishing power`
+    $("toolPower").innerHTML = `${+(toolList.get(curTool).minRoll).toFixed(2)} - ${+(toolList.get(curTool).rollRange + toolList.get(curTool).minRoll).toFixed(2)} fishing power`
     $("toolCooldown").innerHTML = `${toolList.get(curTool).cooldown}s cooldown`
     $("toolAvgCatch").innerHTML = `${+(toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch).toFixed(2)} fish caught on average`
     $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)).toFixed(2)} fish/s`
@@ -180,7 +186,12 @@ function catchFish() {
             fishList.get(roll[i]).add(1)
         }
     }
-    let newFish = [0, 0, 0, 0, 0]
+    let newFish = []
+
+    for (let i = 0; i < fishNames.length; i++) {
+        newFish[i] = 0
+    }
+
     for (let i = 0; i < roll.length; i++) {
         switch (roll[i]) {
             case "perch":
@@ -198,6 +209,15 @@ function catchFish() {
             case "walleye":
                 newFish[4]++
                 break
+            case "salmon":
+                newFish[5]++
+                break
+            case "eel":
+                newFish[6]++
+                break
+            case "basa":
+                newFish[7]++
+                break
         }
         if (researchCentreTier !== 0 && roll[i] !== "nothing") {
             researchXp += fishList.get(roll[i]).tier ** 2 + 9 * researchCentreTier ** 3
@@ -209,7 +229,7 @@ function catchFish() {
             showResearch()
         }
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < newFish.length; i++) {
         if (newFish[i] !== 0) {
             af.innerHTML += `<li>${newFish[i]} ${fishNames[i]}</li>`
         } else {
@@ -223,8 +243,8 @@ function catchFish() {
 
 function timer(time) {
     if (time > 0) {
-        $("timer").innerHTML = `Wait ${time.toFixed(1)} seconds before casting again.`
-        setTimeout(timer, 100, time - 0.1)
+        $("timer").innerHTML = `Wait ${time.toFixed(2)} seconds before casting again.`
+        setTimeout(timer, 10, time - 0.01)
     } else {
         $("timer").innerHTML = `Ready to cast!`
         document.querySelector("img.rod").style.visibility = "hidden"
@@ -255,6 +275,9 @@ function sell() {
     fishList.get("catfish").sell()
     fishList.get("whitefish").sell()
     fishList.get("walleye").sell()
+    fishList.get("salmon").sell()
+    fishList.get("eel").sell()
+    fishList.get("basa").sell()
     updateFishList()
 }
 
@@ -352,12 +375,17 @@ function loadSave() {
     const lsMapleRod = lg("mapleRodOwned")
     const lsBambooRod = lg("bambooRodOwned")
     const lsTool = lg("curTool")
+    const lsCD = lg("cooldown")
     const lsPerch = lg("perch")
     const lsShrimp = lg("shrimp")
     const lsCatfish = lg("catfish")
     const lsWhitefish = lg("whitefish")
     const lsWalleye = lg("walleye")
+    const lsSalmon = lg("salmon")
+    const lsEel = lg("eel")
+    const lsBasa = lg("basa")
 
+    // this is giving isEven() vibes
     if (lsMoney !== null) {
         money = Number.parseInt(lsMoney)
     }
@@ -402,6 +430,10 @@ function loadSave() {
         curTool = lsTool
         selectTool(curTool)
     }
+    if (lsCD !== null) {
+        fishingTimer = lsCD
+        timer(+fishingTimer)
+    }
     if (lsPerch !== null) {
         fishList.get("perch").quantity = Number.parseInt(lsPerch)
     }
@@ -416,6 +448,15 @@ function loadSave() {
     }
     if (lsWalleye !== null) {
         fishList.get("walleye").quantity = Number.parseInt(lsWalleye)
+    }
+    if (lsSalmon !== null) {
+        fishList.get("salmon").quantity = Number.parseInt(lsSalmon)
+    }
+    if (lsEel !== null) {
+        fishList.get("eel").quantity = Number.parseInt(lsEel)
+    }
+    if (lsBasa !== null) {
+        fishList.get("basa").quantity = Number.parseInt(lsBasa)
     }
 }
 
@@ -435,11 +476,15 @@ document.addEventListener("keydown", e => {
         ls("mapleRodOwned", toolList.get("mapleRod").owned)
         ls("bambooRodOwned", toolList.get("bambooRod").owned)
         ls("curTool", curTool)
+        ls("cooldown", fishingTimer)
         ls("perch", fishList.get("perch").quantity)
         ls("shrimp", fishList.get("shrimp").quantity)
         ls("catfish", fishList.get("catfish").quantity)
         ls("whitefish", fishList.get("whitefish").quantity)
         ls("walleye", fishList.get("walleye").quantity)
+        ls("salmon", fishList.get("salmon").quantity)
+        ls("eel", fishList.get("eel").quantity)
+        ls("basa", fishList.get("basa").quantity)
 
         const div = document.createElement("div")
         div.className = "saveBox"

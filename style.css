@@ -131,3 +131,9 @@ button {
 #rods {
     cursor: pointer;
 }
+
+.settings {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}

@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "0.2023.06.XX.02"
+const internalVer = "0.2023.06.09.03"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
 
 class Fish {
@@ -163,16 +163,21 @@ function updateFishList() {
 }
 
 function updateToolInfo() {
+    const nothingChance = toolList.get(curTool).minRoll > 10 ? 1 : 1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)
+    const avgFish = (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch) * nothingChance
+    console.log(toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)
+    console.log(1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch))
+
     $("toolName").innerHTML = toolList.get(curTool).name
-    $("toolPower").innerHTML = `${+(toolList.get(curTool).minRoll).toFixed(2)} - ${+(toolList.get(curTool).rollRange + toolList.get(curTool).minRoll).toFixed(2)} fishing power`
+    $("toolPower").innerHTML = `${toolList.get(curTool).minRoll} - ${toolList.get(curTool).rollRange + toolList.get(curTool).minRoll} fishing power`
     $("toolCooldown").innerHTML = `${toolList.get(curTool).cooldown}s cooldown`
-    $("toolAvgCatch").innerHTML = `${+(toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch).toFixed(2)} fish caught on average`
-    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)).toFixed(2)} fish/s`
+    $("toolAvgCatch").innerHTML = `${+avgFish.toFixed(2)} fish caught on average`
+    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * avgFish).toFixed(2)} fish/s`
 }
 
 function catchFish() {
     let roll = []
-    let catchAmount = Math.floor(Math.random() * toolList.get(curTool).catchRange + toolList.get(curTool).minCatch + 1)
+    let catchAmount = Math.floor(Math.random() * (toolList.get(curTool).catchRange + 1) + toolList.get(curTool).minCatch)
     let af = $("addFish")
     af.innerHTML = ""
 
@@ -229,12 +234,18 @@ function catchFish() {
             showResearch()
         }
     }
+
+    let addedFishes = 0
     for (let i = 0; i < newFish.length; i++) {
         if (newFish[i] !== 0) {
+            addedFishes++
             af.innerHTML += `<li>${newFish[i]} ${fishNames[i]}</li>`
         } else {
             af.innerHTML += "<li style='list-style-type:\" \"'></li>" // this is one of the greatest workarounds to any problem ever
         }
+    }
+    if (addedFishes === 0) {
+        $("moneyGain").innerHTML = "You caught nothing :("
     }
     updateFishList()
 
@@ -359,6 +370,13 @@ function init() {
     updateToolInfo()
     updateFishList()
     updateMoney()
+}
+
+function dialogBox(cssClass, content) {
+    const div = document.createElement("div")
+    div.className = cssClass
+    div.innerHTML = content
+    return div
 }
 
 function wipeSave() { localStorage.clear() }
@@ -486,13 +504,21 @@ document.addEventListener("keydown", e => {
         ls("eel", fishList.get("eel").quantity)
         ls("basa", fishList.get("basa").quantity)
 
-        const div = document.createElement("div")
+        /*const div = document.createElement("div")
         div.className = "saveBox"
-        div.innerHTML = "<p>Game saved!<p>"
-        document.querySelector("body").appendChild(div)
-        setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
+        div.innerHTML = "<p>Game saved!</p>"
+        document.querySelector("body").appendChild(div)*/
+        const save = dialogBox("saveBox", "<p>Game saved!</p>")
+        document.querySelector("body").appendChild(save)
+        setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000)
+    } if (e.key === "Tab") {
+        e.preventDefault()
     }
 })
+
+function openSettings() {
+
+}
 
 /*function exampleSave() {
     ls("money", 10004)

@@ -1,7 +1,7 @@
 "use strict"
 
-const internalVer = "0.2023.06.09.05"
-let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
+const internalVer = "0.2023.06.10.06"
+let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1, settings
 
 class Fish {
     constructor(xp, sellPrice, quantity, tier) {
@@ -172,8 +172,8 @@ function updateToolInfo() {
     $("toolName").innerHTML = toolList.get(curTool).name
     $("toolPower").innerHTML = `${toolList.get(curTool).minRoll} - ${toolList.get(curTool).rollRange + toolList.get(curTool).minRoll} fishing power`
     $("toolCooldown").innerHTML = `${toolList.get(curTool).cooldown}s cooldown`
-    $("toolAvgCatch").innerHTML = `${+avgFish.toFixed(2)} fish caught on average`
-    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * avgFish).toFixed(2)} fish/s`
+    $("toolAvgCatch").innerHTML = `${+avgFish.toFixed(numAccuracy)} fish caught on average`
+    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * avgFish).toFixed(numAccuracy)} fish/s`
 }
 
 function catchFish() {
@@ -255,7 +255,7 @@ function catchFish() {
 
 function timer(time) {
     if (time > 0) {
-        $("timer").innerHTML = `Wait ${time.toFixed(2)} seconds before casting again.`
+        $("timer").innerHTML = `Wait ${time.toFixed(numAccuracy)} seconds before casting again.`
         setTimeout(timer, 10, time - 0.01)
     } else {
         $("timer").innerHTML = `Ready to cast!`
@@ -313,11 +313,12 @@ function changeShop(tab) {
 function increaseResearchTier() {
     researchTier++
     nextResearchReq = (nextResearchReq * (3 + 1 / (researchTier + 1))).toFixed(0)
-    console.log(nextResearchReq)
+    let researchContent
     
     switch (researchTier) {
         case 1:
             toolList.get("copperSpear").unlock()
+            researchContent = "<li>Copper Spear</li>"
             break
         case 2:
             toolList.get("badRod").unlock()
@@ -330,20 +331,32 @@ function increaseResearchTier() {
             div.addEventListener("click", () => (changeShop("rodContent")))
             $("rodContent").style.display = "none"
             document.getElementsByClassName("storeTabs")[0].appendChild(div)
+
+            researchContent = "<li>Makeshift Rod</li><li>Maple Rod</li><li>Bamboo Rod</li>"
             break
         case 3:
             toolList.get("bronzeSpear").unlock()
+            researchContent = "<li>Bronze Spear</li>"
             break
         case 4:
             toolList.get("graphRod").unlock()
+            researchContent = "<li>Graphite Rod</li>"
             break
         case 5:
             toolList.get("steelSpear").unlock()
+            researchContent = "<li>Steel Spear</li>"
             break
         case 6:
             toolList.get("fiberRod").unlock()
+            researchContent = "<li>Fiberglass Rod</li>"
             break
     }
+    if (document.querySelector(".resResult") !== null) {
+        document.querySelector(".middle").removeChild(document.querySelector(".resResult"))
+    }
+    const researchResults = dialogBox("resResult", `<h1>Research Lvl ${researchTier}</h1><p>You unlocked: </p><ul>${researchContent}</ul>`)
+    document.querySelector(".middle").appendChild(researchResults)
+    setTimeout(() => { document.querySelector(".middle").removeChild(researchResults) }, 10000)
 }
 
 function showResearch() {
@@ -397,6 +410,7 @@ function wipeSave() {
 }
 
 function loadSave() {
+    const lsAcc = lg("numAcc")
     const lsMoney = lg("money")
     const lsRXP = lg("researchXp")
     const lsRT = lg("researchTier")
@@ -422,6 +436,9 @@ function loadSave() {
     const lsBasa = lg("basa")
 
     // this is giving isEven() vibes
+    if (lsAcc !== null) {
+        numAccuracy = lsAcc
+    }
     if (lsMoney !== null) {
         money = Number.parseInt(lsMoney)
     }
@@ -509,6 +526,7 @@ function loadSave() {
 }
 
 function createSave() {
+    ls("numAcc", numAccuracy)
     ls("money", money)
     ls("researchXp", researchXp)
     ls("researchTier", researchTier)
@@ -520,7 +538,7 @@ function createSave() {
     ls("badRodOwned", toolList.get("badRod").owned)
     ls("mapleRodOwned", toolList.get("mapleRod").owned)
     ls("bambooRodOwned", toolList.get("bambooRod").owned)
-    ls("graphpRodOwned", toolList.get("graphRod").owned)
+    ls("graphRodOwned", toolList.get("graphRod").owned)
     ls("fiberRodOwned", toolList.get("fiberRod").owned)
     ls("curTool", curTool)
     ls("cooldown", fishingTimer)
@@ -536,7 +554,6 @@ function createSave() {
     const save = dialogBox("saveBox", "<p>Game saved!</p>")
     document.querySelector("body").appendChild(save)
     setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000)
-    closeSettings()
 }
 
 document.addEventListener("keydown", e => {
@@ -549,25 +566,32 @@ document.addEventListener("keydown", e => {
     }
 })
 
-function closeSettings() {
-    if (document.querySelector(".settingsBox") !== null) {
-        document.querySelector("body").removeChild(document.querySelector(".settingsBox"))
+function closeSettings(e) {
+    const settings = document.querySelector(".settingsBox")
+    if (settings !== null) {
+        if (!settings.contains(e.target) && !document.querySelector(".settings").contains(e.target)) {
+            document.querySelector("body").removeChild(document.querySelector(".settingsBox"))
+            document.removeEventListener("click", closeSettings)
+        }
     }
 }
  
 function openSettings() {
-    const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button>")
+    const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button><br><input type='checkbox' id='highNumAcc' onclick=updateSettings()><label for='highNumAcc'>Higher decimal accuracy</label>")
     document.querySelector("body").appendChild(settings)
-    document.addEventListener("click", (e) => {
-        if (!settings.contains(e.target) && !document.querySelector(".settings").contains(e.target)) {
-            closeSettings()
-        }
-    })
+    settings.querySelector("#highNumAcc").checked = (numAccuracy === 2)
+
+    document.addEventListener("click", closeSettings)
+}
+
+function updateSettings() {
+    numAccuracy = ($("highNumAcc").checked) ? 2 : 1
+    updateToolInfo()
 }
 
 function exampleSave() {
     ls("money", 10004)
-    ls("researchXp", 1560)
+    ls("researchXp", 230000)
     ls("researchTier", 5)
     ls("rcOwned", true)
     ls("flintSpearOwned", true)

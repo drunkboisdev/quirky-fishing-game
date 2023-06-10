@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "0.2023.06.09.03"
+const internalVer = "0.2023.06.09.05"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
 
 class Fish {
@@ -97,10 +97,13 @@ fishList.set("basa", new Fish(40, 25, 0, 8))
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 50, 300, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 50, 250, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("steelSpear", new Tool("Steel Spear", 110, 390, 4, 2, 4.5, 4200, false, false, () => { $("steelSpearPrice").innerHTML = "Owned" }))
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
 toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
 toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 950, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("graphRod", new Tool("Graphite Rod", 100, 290, 3, 2, 3.4, 2500, false, false, () => { $("graphRodPrice").innerHTML = "Owned" }))
+toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 520, 5, 2, 3.2, 5900, false, false, () => { $("fiberRodPrice").innerHTML = "Owned" }))
 //toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -165,8 +168,6 @@ function updateFishList() {
 function updateToolInfo() {
     const nothingChance = toolList.get(curTool).minRoll > 10 ? 1 : 1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)
     const avgFish = (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch) * nothingChance
-    console.log(toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)
-    console.log(1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch))
 
     $("toolName").innerHTML = toolList.get(curTool).name
     $("toolPower").innerHTML = `${toolList.get(curTool).minRoll} - ${toolList.get(curTool).rollRange + toolList.get(curTool).minRoll} fishing power`
@@ -311,7 +312,8 @@ function changeShop(tab) {
 
 function increaseResearchTier() {
     researchTier++
-    nextResearchReq *= ((researchTier + 1) * 3 + 1) / (researchTier + 1)
+    nextResearchReq = (nextResearchReq * (3 + 1 / (researchTier + 1))).toFixed(0)
+    console.log(nextResearchReq)
     
     switch (researchTier) {
         case 1:
@@ -331,6 +333,15 @@ function increaseResearchTier() {
             break
         case 3:
             toolList.get("bronzeSpear").unlock()
+            break
+        case 4:
+            toolList.get("graphRod").unlock()
+            break
+        case 5:
+            toolList.get("steelSpear").unlock()
+            break
+        case 6:
+            toolList.get("fiberRod").unlock()
             break
     }
 }
@@ -357,6 +368,7 @@ function selectTool(item) {
     if (!toolList.get(item).owned) {
         toolList.get(item).buy()
     } else {
+        console.log(curTool)
         $(`${curTool}Price`).innerHTML = "Owned"
         curTool = item
         $(`${curTool}Price`).innerHTML = "Selected!"
@@ -379,7 +391,10 @@ function dialogBox(cssClass, content) {
     return div
 }
 
-function wipeSave() { localStorage.clear() }
+function wipeSave() {
+    localStorage.clear()
+    location.reload()
+}
 
 function loadSave() {
     const lsMoney = lg("money")
@@ -389,9 +404,12 @@ function loadSave() {
     const lsFlintSpear = lg("flintSpearOwned")
     const lsCopperSpear = lg("copperSpearOwned")
     const lsBronzeSpear = lg("bronzeSpearOwned")
+    const lsSteelSpear = lg("steelSpearOwned")
     const lsBadRod = lg("badRodOwned")
     const lsMapleRod = lg("mapleRodOwned")
     const lsBambooRod = lg("bambooRodOwned")
+    const lsGraphRod = lg("graphRodOwned")
+    const lsFiberRod = lg("fiberRodOwned")
     const lsTool = lg("curTool")
     const lsCD = lg("cooldown")
     const lsPerch = lg("perch")
@@ -420,7 +438,7 @@ function loadSave() {
         if (lsRC === "true") { buyables[0].buyFunc() }
     }
     if (lsFlintSpear !== null) {
-        toolList.get("flintSpear").owned = (lsFlintSpear === "true")
+        toolList.get("flintSpear").owned = (lsFlintSpear === "true") // why is localstorage like this
         if (lsFlintSpear === "true") { selectTool("flintSpear") }
     }
     if (lsCopperSpear !== null) {
@@ -430,6 +448,10 @@ function loadSave() {
     if (lsBronzeSpear !== null) {
         toolList.get("bronzeSpear").owned = (lsBronzeSpear === "true")
         if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
+    }
+    if (lsSteelSpear !== null) {
+        toolList.get("steelSpear").owned = (lsSteelSpear === "true")
+        if (lsSteelSpear === "true") { selectTool("steelSpear") }
     }
     if (lsBadRod !== null) {
         toolList.get("badRod").owned = (lsBadRod === "true")
@@ -442,6 +464,14 @@ function loadSave() {
     if (lsBambooRod !== null) {
         toolList.get("bambooRod").owned = (lsBambooRod === "true")
         if (lsBambooRod === "true") { selectTool("bambooRod") }
+    }
+    if (lsGraphRod !== null) {
+        toolList.get("graphRod").owned = (lsGraphRod === "true")
+        if (lsGraphRod === "true") { selectTool("graphRod") }
+    }
+    if (lsFiberRod !== null) {
+        toolList.get("fiberRod").owned = (lsFiberRod === "true")
+        if (lsFiberRod === "true") { selectTool("fiberRod") }
     }
     if (lsTool !== null) {
         $("woodenSpearPrice").innerHTML = "Owned"
@@ -478,63 +508,81 @@ function loadSave() {
     }
 }
 
-// basically a save function lmao
+function createSave() {
+    ls("money", money)
+    ls("researchXp", researchXp)
+    ls("researchTier", researchTier)
+    ls("rcOwned", buyables[0].owned)
+    ls("flintSpearOwned", toolList.get("flintSpear").owned)
+    ls("copperSpearOwned", toolList.get("copperSpear").owned)
+    ls("bronzeSpearOwned", toolList.get("bronzeSpear").owned)
+    ls("steelSpearOwned", toolList.get("steelSpear").owned)
+    ls("badRodOwned", toolList.get("badRod").owned)
+    ls("mapleRodOwned", toolList.get("mapleRod").owned)
+    ls("bambooRodOwned", toolList.get("bambooRod").owned)
+    ls("graphpRodOwned", toolList.get("graphRod").owned)
+    ls("fiberRodOwned", toolList.get("fiberRod").owned)
+    ls("curTool", curTool)
+    ls("cooldown", fishingTimer)
+    ls("perch", fishList.get("perch").quantity)
+    ls("shrimp", fishList.get("shrimp").quantity)
+    ls("catfish", fishList.get("catfish").quantity)
+    ls("whitefish", fishList.get("whitefish").quantity)
+    ls("walleye", fishList.get("walleye").quantity)
+    ls("salmon", fishList.get("salmon").quantity)
+    ls("eel", fishList.get("eel").quantity)
+    ls("basa", fishList.get("basa").quantity)
+
+    const save = dialogBox("saveBox", "<p>Game saved!</p>")
+    document.querySelector("body").appendChild(save)
+    setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000)
+    closeSettings()
+}
+
 document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
         e.preventDefault()
 
-        ls("money", money)
-        ls("researchXp", researchXp)
-        ls("researchTier", researchTier)
-        ls("rcOwned", buyables[0].owned)
-        ls("flintSpearOwned", toolList.get("flintSpear").owned)
-        ls("copperSpearOwned", toolList.get("copperSpear").owned)
-        ls("bronzeSpearOwned", toolList.get("bronzeSpear").owned)
-        ls("badRodOwned", toolList.get("badRod").owned)
-        ls("mapleRodOwned", toolList.get("mapleRod").owned)
-        ls("bambooRodOwned", toolList.get("bambooRod").owned)
-        ls("curTool", curTool)
-        ls("cooldown", fishingTimer)
-        ls("perch", fishList.get("perch").quantity)
-        ls("shrimp", fishList.get("shrimp").quantity)
-        ls("catfish", fishList.get("catfish").quantity)
-        ls("whitefish", fishList.get("whitefish").quantity)
-        ls("walleye", fishList.get("walleye").quantity)
-        ls("salmon", fishList.get("salmon").quantity)
-        ls("eel", fishList.get("eel").quantity)
-        ls("basa", fishList.get("basa").quantity)
-
-        /*const div = document.createElement("div")
-        div.className = "saveBox"
-        div.innerHTML = "<p>Game saved!</p>"
-        document.querySelector("body").appendChild(div)*/
-        const save = dialogBox("saveBox", "<p>Game saved!</p>")
-        document.querySelector("body").appendChild(save)
-        setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000)
+        createSave()
     } if (e.key === "Tab") {
         e.preventDefault()
     }
 })
 
+function closeSettings() {
+    if (document.querySelector(".settingsBox") !== null) {
+        document.querySelector("body").removeChild(document.querySelector(".settingsBox"))
+    }
+}
+ 
 function openSettings() {
-
+    const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button>")
+    document.querySelector("body").appendChild(settings)
+    document.addEventListener("click", (e) => {
+        if (!settings.contains(e.target) && !document.querySelector(".settings").contains(e.target)) {
+            closeSettings()
+        }
+    })
 }
 
-/*function exampleSave() {
+function exampleSave() {
     ls("money", 10004)
-    ls("researchXp", 156)
-    ls("researchTier", 3)
+    ls("researchXp", 1560)
+    ls("researchTier", 5)
     ls("rcOwned", true)
     ls("flintSpearOwned", true)
     ls("copperSpearOwned", true)
     ls("bronzeSpearOwned", true)
+    ls("steelSpearOwned", true)
     ls("badRodOwned", false)
     ls("mapleRodOwned", true)
     ls("bambooRodOwned", true)
-    ls("curTool", "bambooRod")
+    ls("graphRodOwned", true)
+    ls("fiberRodOwned", false)
+    ls("curTool", "steelSpear")
     ls("perch", 0)
     ls("shrimp", 2)
     ls("catfish", 14)
     ls("whitefish", 19)
     ls("walleye", 0)
-}*/
+}

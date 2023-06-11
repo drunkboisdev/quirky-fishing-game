@@ -1,12 +1,11 @@
 "use strict"
 
-const internalVer = "2023.04.29.16"
-let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600
+const internalVer = "0.2023.06.10.08"
+let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1
 
 class Fish {
-    constructor(minXp, xpRange, sellPrice, quantity, tier) {
-        this.minXp = minXp
-        this.xpRange = xpRange
+    constructor(xp, sellPrice, quantity, tier) {
+        this.xp = xp
         this.sellPrice = sellPrice
         this.quantity = quantity
         this.tier = tier
@@ -76,7 +75,7 @@ class Buyable {
 }
 
 let curTool = "woodenSpear"
-const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye"]
+const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"]
 
 const buyables = [
     new Buyable("rcTier1", 300, () => {
@@ -86,19 +85,25 @@ const buyables = [
     }, false)
 ]
 
-fishList.set("perch", new Fish(3, 1, 2, 0, 1))
-fishList.set("shrimp", new Fish(6, 2, 5, 0, 2))
-fishList.set("catfish", new Fish(9, 2, 8, 0, 3))
-fishList.set("whitefish", new Fish(14, 4, 12, 0, 4))
-fishList.set("walleye", new Fish(16, 5, 13, 0, 5))
+fishList.set("perch", new Fish(3, 2, 0, 1))
+fishList.set("shrimp", new Fish(6, 5, 0, 2))
+fishList.set("catfish", new Fish(10, 8, 0, 3))
+fishList.set("whitefish", new Fish(14, 12, 0, 4))
+fishList.set("walleye", new Fish(19, 13, 0, 5))
+fishList.set("salmon", new Fish(25, 18, 0, 6))
+fishList.set("eel", new Fish(32, 20, 0, 7))
+fishList.set("basa", new Fish(40, 25, 0, 8))
 
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 50, 300, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 60, 240, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("steelSpear", new Tool("Steel Spear", 140, 510, 4, 2, 4.5, 8800, false, false, () => { $("steelSpearPrice").innerHTML = "Owned" }))
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
-toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 950, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("mapleRod", new Tool("Maple Rod", 25, 95, 2, 1, 3.8, 480, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 130, 2, 2, 3.6, 900, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("graphRod", new Tool("Graphite Rod", 120, 400, 3, 2, 3.4, 3500, false, false, () => { $("graphRodPrice").innerHTML = "Owned" }))
+toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 570, 5, 2, 3.2, 15000, false, false, () => { $("fiberRodPrice").innerHTML = "Owned" }))
 //toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -140,10 +145,14 @@ function pickFish(roll) {
         fish = "catfish"
     } else if (roll <= 210) {
         fish = "whitefish"
-    } /*else if (roll <= 310) {
+    } else if (roll <= 310) {
         fish = "walleye"
-    }*/ else {
-        fish = "walleye"
+    } else if (roll <= 430) {
+        fish = "salmon"
+    } else if (roll <= 570) {
+        fish = "eel"
+    } else {
+        fish = "basa"
     }
     return fish
 }
@@ -157,20 +166,32 @@ function updateFishList() {
 }
 
 function updateToolInfo() {
+    const nothingChance = toolList.get(curTool).minRoll > 10 ? 1 : 1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)
+    const avgFish = (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch) * nothingChance
+
     $("toolName").innerHTML = toolList.get(curTool).name
-    $("toolPower").innerHTML = `${+(toolList.get(curTool).rollRange / 2 + toolList.get(curTool).minRoll).toFixed(2)} fishing power`
+    $("toolPower").innerHTML = `${toolList.get(curTool).minRoll} - ${toolList.get(curTool).rollRange + toolList.get(curTool).minRoll} fishing power`
     $("toolCooldown").innerHTML = `${toolList.get(curTool).cooldown}s cooldown`
-    $("toolAvgCatch").innerHTML = `${+(toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch).toFixed(2)} fish caught on average`
-    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch)).toFixed(2)} fish/s`
+    $("toolAvgCatch").innerHTML = `${+avgFish.toFixed(numAccuracy)} fish caught on average`
+    $("toolFishPerSec").innerHTML = `${+(1 / toolList.get(curTool).cooldown * avgFish).toFixed(numAccuracy)} fish/s`
 }
 
 function catchFish() {
     let roll = []
-    let catchAmount = Math.floor(Math.random() * toolList.get(curTool).catchRange + toolList.get(curTool).minCatch + 1)
+    let catchAmount = Math.floor(Math.random() * (toolList.get(curTool).catchRange + 1) + toolList.get(curTool).minCatch)
     let af = $("addFish")
     af.innerHTML = ""
+    const rodSpr = document.querySelector("img.rod")
 
-    document.querySelector("img.rod").src = `assets/tools/${curTool}.png`
+    rodSpr.src = `assets/tools/${curTool}.png`
+
+    if (curTool.includes("Spear")) {
+        rodSpr.style.top = "16px"
+        rodSpr.style.left = "160px"
+    } else if (curTool.includes("Rod")) {
+        rodSpr.style.top = "120px"
+        rodSpr.style.left = "216px"
+    }
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1))
@@ -180,7 +201,12 @@ function catchFish() {
             fishList.get(roll[i]).add(1)
         }
     }
-    let newFish = [0, 0, 0, 0, 0]
+    let newFish = []
+
+    for (let i = 0; i < fishNames.length; i++) {
+        newFish[i] = 0
+    }
+
     for (let i = 0; i < roll.length; i++) {
         switch (roll[i]) {
             case "perch":
@@ -198,33 +224,51 @@ function catchFish() {
             case "walleye":
                 newFish[4]++
                 break
+            case "salmon":
+                newFish[5]++
+                break
+            case "eel":
+                newFish[6]++
+                break
+            case "basa":
+                newFish[7]++
+                break
         }
         if (researchCentreTier !== 0 && roll[i] !== "nothing") {
             researchXp += fishList.get(roll[i]).tier ** 2 + 9 * researchCentreTier ** 3
 
             if (researchXp >= nextResearchReq) {
                 researchXp -= nextResearchReq
-                increaseResearchTier()
+                increaseResearchTier(true)
             }
             showResearch()
         }
     }
-    for (let i = 0; i < 5; i++) {
+
+    let addedFishes = 0
+    for (let i = 0; i < newFish.length; i++) {
         if (newFish[i] !== 0) {
+            addedFishes++
             af.innerHTML += `<li>${newFish[i]} ${fishNames[i]}</li>`
         } else {
             af.innerHTML += "<li style='list-style-type:\" \"'></li>" // this is one of the greatest workarounds to any problem ever
         }
     }
+    if (addedFishes === 0) {
+        $("moneyGain").innerHTML = "You caught nothing :("
+    }
+    else {
+        $("moneyGain").innerHTML = ""
+    }
     updateFishList()
 
-    document.querySelector("img.rod").style.visibility = "visible"
+    rodSpr.style.visibility = "visible"
 }
 
 function timer(time) {
     if (time > 0) {
-        $("timer").innerHTML = `Wait ${time.toFixed(1)} seconds before casting again.`
-        setTimeout(timer, 100, time - 0.1)
+        $("timer").innerHTML = `Wait ${time.toFixed(numAccuracy)} seconds before casting again.`
+        setTimeout(timer, 10, time - 0.01)
     } else {
         $("timer").innerHTML = `Ready to cast!`
         document.querySelector("img.rod").style.visibility = "hidden"
@@ -255,6 +299,9 @@ function sell() {
     fishList.get("catfish").sell()
     fishList.get("whitefish").sell()
     fishList.get("walleye").sell()
+    fishList.get("salmon").sell()
+    fishList.get("eel").sell()
+    fishList.get("basa").sell()
     updateFishList()
 }
 
@@ -275,13 +322,15 @@ function changeShop(tab) {
     $(tab).style.display = "block"
 }
 
-function increaseResearchTier() {
+function increaseResearchTier(showBox = false) {
     researchTier++
-    nextResearchReq *= ((researchTier + 1) * 3 + 1) / (researchTier + 1)
+    nextResearchReq = (nextResearchReq * (2 + 1 / (researchTier + 1))).toFixed(0)
+    let researchContent
     
     switch (researchTier) {
         case 1:
             toolList.get("copperSpear").unlock()
+            researchContent = "<li>Copper Spear</li>"
             break
         case 2:
             toolList.get("badRod").unlock()
@@ -293,11 +342,35 @@ function increaseResearchTier() {
             div.id = "rods"
             div.addEventListener("click", () => (changeShop("rodContent")))
             $("rodContent").style.display = "none"
-            document.getElementsByClassName("storeTabs")[0].appendChild(div)
+            document.querySelector(".storeTabs").appendChild(div)
+
+            researchContent = "<li>Makeshift Rod</li><li>Maple Rod</li><li>Bamboo Rod</li>"
             break
         case 3:
             toolList.get("bronzeSpear").unlock()
+            researchContent = "<li>Bronze Spear</li>"
             break
+        case 4:
+            toolList.get("graphRod").unlock()
+            researchContent = "<li>Graphite Rod</li>"
+            break
+        case 5:
+            toolList.get("steelSpear").unlock()
+            researchContent = "<li>Steel Spear</li>"
+            break
+        case 6:
+            toolList.get("fiberRod").unlock()
+            researchContent = "<li>Fiberglass Rod</li>"
+            break
+    }
+    if (document.querySelector(".resResult") !== null) {
+        document.querySelector(".middle").removeChild(document.querySelector(".resResult"))
+    }
+
+    if (showBox) {
+        const researchResults = dialogBox("resResult", `<h1>Research Lvl ${researchTier}</h1><p>You unlocked: </p><ul>${researchContent}</ul>`)
+        document.querySelector(".middle").appendChild(researchResults)
+        setTimeout(() => { document.querySelector(".middle").removeChild(researchResults) }, 10000)
     }
 }
 
@@ -338,9 +411,22 @@ function init() {
     updateMoney()
 }
 
-function wipeSave() { localStorage.clear() }
+function dialogBox(cssClass, content) {
+    const div = document.createElement("div")
+    div.className = cssClass
+    div.innerHTML = content
+    return div
+}
+
+function wipeSave() {
+    localStorage.clear()
+    const warning = dialogBox("saveBox", "<h1>Save deleted!</h1><p>If you didn't mean to wipe your progress (for whatever reason),<br>save again to keep it. If you <strong>did</strong> mean to wipe your save file,<br>restart for changes to take effect.</p>")
+    document.querySelector("body").appendChild(warning)
+    setTimeout(() => { document.querySelector("body").removeChild(warning) }, 10000)
+}
 
 function loadSave() {
+    const lsAcc = lg("numAcc")
     const lsMoney = lg("money")
     const lsRXP = lg("researchXp")
     const lsRT = lg("researchTier")
@@ -348,16 +434,27 @@ function loadSave() {
     const lsFlintSpear = lg("flintSpearOwned")
     const lsCopperSpear = lg("copperSpearOwned")
     const lsBronzeSpear = lg("bronzeSpearOwned")
+    const lsSteelSpear = lg("steelSpearOwned")
     const lsBadRod = lg("badRodOwned")
     const lsMapleRod = lg("mapleRodOwned")
     const lsBambooRod = lg("bambooRodOwned")
+    const lsGraphRod = lg("graphRodOwned")
+    const lsFiberRod = lg("fiberRodOwned")
     const lsTool = lg("curTool")
+    const lsCD = lg("cooldown")
     const lsPerch = lg("perch")
     const lsShrimp = lg("shrimp")
     const lsCatfish = lg("catfish")
     const lsWhitefish = lg("whitefish")
     const lsWalleye = lg("walleye")
+    const lsSalmon = lg("salmon")
+    const lsEel = lg("eel")
+    const lsBasa = lg("basa")
 
+    // this is giving isEven() vibes
+    if (lsAcc !== null) {
+        numAccuracy = lsAcc
+    }
     if (lsMoney !== null) {
         money = Number.parseInt(lsMoney)
     }
@@ -369,38 +466,53 @@ function loadSave() {
             increaseResearchTier()
         }
     }
-    if (lsRC !== null) {
-        buyables[0].owned = (lsRC === "true")
-        if (lsRC === "true") { buyables[0].buyFunc() }
+    if (lsRC === "true") {
+        buyables[0].owned = true
+        buyables[0].buyFunc()
     }
-    if (lsFlintSpear !== null) {
-        toolList.get("flintSpear").owned = (lsFlintSpear === "true")
-        if (lsFlintSpear === "true") { selectTool("flintSpear") }
+    if (lsFlintSpear === "true") { // why is localstorage like this
+        toolList.get("flintSpear").owned = true
+        selectTool("flintSpear")
     }
-    if (lsCopperSpear !== null) {
-        toolList.get("copperSpear").owned = (lsCopperSpear === "true")
-        if (lsCopperSpear === "true") { selectTool("copperSpear") }
+    if (lsCopperSpear === "true") {
+        toolList.get("copperSpear").owned = true
+        selectTool("copperSpear")
     }
-    if (lsBronzeSpear !== null) {
-        toolList.get("bronzeSpear").owned = (lsBronzeSpear === "true")
-        if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
+    if (lsBronzeSpear === "true") {
+        toolList.get("bronzeSpear").owned = true
+        selectTool("bronzeSpear")
     }
-    if (lsBadRod !== null) {
-        toolList.get("badRod").owned = (lsBadRod === "true")
-        if (lsBadRod === "true") { selectTool("badRod") }
+    if (lsSteelSpear === "true") {
+        toolList.get("steelSpear").owned = true
+        selectTool("steelSpear")
     }
-    if (lsMapleRod !== null) {
-        toolList.get("mapleRod").owned = (lsMapleRod === "true")
-        if (lsMapleRod === "true") { selectTool("mapleRod") }
+    if (lsBadRod === "true") {
+        toolList.get("badRod").owned = true
+        selectTool("badRod")
     }
-    if (lsBambooRod !== null) {
-        toolList.get("bambooRod").owned = (lsBambooRod === "true")
-        if (lsBambooRod === "true") { selectTool("bambooRod") }
+    if (lsMapleRod === "true") {
+        toolList.get("mapleRod").owned = true
+        selectTool("mapleRod")
+    }
+    if (lsBambooRod === "true") {
+        toolList.get("bambooRod").owned = true
+        selectTool("bambooRod")
+    }
+    if (lsGraphRod === "true") {
+        toolList.get("graphRod").owned = true
+        selectTool("graphRod")
+    }
+    if (lsFiberRod === "true") {
+        toolList.get("fiberRod").owned = true
+        selectTool("fiberRod")
     }
     if (lsTool !== null) {
         $("woodenSpearPrice").innerHTML = "Owned"
-        curTool = lsTool
-        selectTool(curTool)
+        selectTool(lsTool)
+    }
+    if (lsCD !== null) {
+        fishingTimer = lsCD
+        timer(+fishingTimer)
     }
     if (lsPerch !== null) {
         fishList.get("perch").quantity = Number.parseInt(lsPerch)
@@ -417,53 +529,101 @@ function loadSave() {
     if (lsWalleye !== null) {
         fishList.get("walleye").quantity = Number.parseInt(lsWalleye)
     }
+    if (lsSalmon !== null) {
+        fishList.get("salmon").quantity = Number.parseInt(lsSalmon)
+    }
+    if (lsEel !== null) {
+        fishList.get("eel").quantity = Number.parseInt(lsEel)
+    }
+    if (lsBasa !== null) {
+        fishList.get("basa").quantity = Number.parseInt(lsBasa)
+    }
 }
 
-// basically a save function lmao
+function createSave() {
+    ls("numAcc", numAccuracy)
+    ls("money", money)
+    ls("researchXp", researchXp)
+    ls("researchTier", researchTier)
+    ls("rcOwned", buyables[0].owned)
+    ls("flintSpearOwned", toolList.get("flintSpear").owned)
+    ls("copperSpearOwned", toolList.get("copperSpear").owned)
+    ls("bronzeSpearOwned", toolList.get("bronzeSpear").owned)
+    ls("steelSpearOwned", toolList.get("steelSpear").owned)
+    ls("badRodOwned", toolList.get("badRod").owned)
+    ls("mapleRodOwned", toolList.get("mapleRod").owned)
+    ls("bambooRodOwned", toolList.get("bambooRod").owned)
+    ls("graphRodOwned", toolList.get("graphRod").owned)
+    ls("fiberRodOwned", toolList.get("fiberRod").owned)
+    ls("curTool", curTool)
+    ls("cooldown", fishingTimer)
+    ls("perch", fishList.get("perch").quantity)
+    ls("shrimp", fishList.get("shrimp").quantity)
+    ls("catfish", fishList.get("catfish").quantity)
+    ls("whitefish", fishList.get("whitefish").quantity)
+    ls("walleye", fishList.get("walleye").quantity)
+    ls("salmon", fishList.get("salmon").quantity)
+    ls("eel", fishList.get("eel").quantity)
+    ls("basa", fishList.get("basa").quantity)
+
+    const save = dialogBox("saveBox", "<p>Game saved!</p>")
+    document.querySelector("body").appendChild(save)
+    setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000)
+}
+
 document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
         e.preventDefault()
 
-        ls("money", money)
-        ls("researchXp", researchXp)
-        ls("researchTier", researchTier)
-        ls("rcOwned", buyables[0].owned)
-        ls("flintSpearOwned", toolList.get("flintSpear").owned)
-        ls("copperSpearOwned", toolList.get("copperSpear").owned)
-        ls("bronzeSpearOwned", toolList.get("bronzeSpear").owned)
-        ls("badRodOwned", toolList.get("badRod").owned)
-        ls("mapleRodOwned", toolList.get("mapleRod").owned)
-        ls("bambooRodOwned", toolList.get("bambooRod").owned)
-        ls("curTool", curTool)
-        ls("perch", fishList.get("perch").quantity)
-        ls("shrimp", fishList.get("shrimp").quantity)
-        ls("catfish", fishList.get("catfish").quantity)
-        ls("whitefish", fishList.get("whitefish").quantity)
-        ls("walleye", fishList.get("walleye").quantity)
-
-        const div = document.createElement("div")
-        div.className = "saveBox"
-        div.innerHTML = "<p>Game saved!<p>"
-        document.querySelector("body").appendChild(div)
-        setTimeout(() => { document.querySelector("body").removeChild(div) }, 2000)
+        createSave()
+    } if (e.key === "Tab") {
+        e.preventDefault()
     }
 })
 
-/*function exampleSave() {
+function closeSettings(e) {
+    const settings = document.querySelector(".settingsBox")
+    if (settings !== null) {
+        if (!settings.contains(e.target) && !document.querySelector(".settings").contains(e.target)) {
+            document.querySelector("body").removeChild(document.querySelector(".settingsBox"))
+            document.removeEventListener("click", closeSettings)
+        }
+    }
+}
+ 
+function openSettings() {
+    if (document.querySelector(".settingsBox") === null) {
+        const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button><br><input type='checkbox' id='highNumAcc' onclick=updateSettings()><label for='highNumAcc'>Higher decimal accuracy</label>")
+        document.querySelector("body").appendChild(settings)
+        settings.querySelector("#highNumAcc").checked = (numAccuracy === 2)
+
+        document.addEventListener("click", closeSettings)
+    }
+}
+
+function updateSettings() {
+    numAccuracy = ($("highNumAcc").checked) ? 2 : 1
+    updateToolInfo()
+}
+
+function exampleSave() {
     ls("money", 10004)
-    ls("researchXp", 156)
-    ls("researchTier", 3)
+    ls("researchXp", 230000)
+    ls("researchTier", 5)
     ls("rcOwned", true)
     ls("flintSpearOwned", true)
     ls("copperSpearOwned", true)
     ls("bronzeSpearOwned", true)
+    ls("steelSpearOwned", true)
     ls("badRodOwned", false)
     ls("mapleRodOwned", true)
     ls("bambooRodOwned", true)
-    ls("curTool", "bambooRod")
+    ls("graphRodOwned", true)
+    ls("fiberRodOwned", false)
+    ls("curTool", "steelSpear")
     ls("perch", 0)
     ls("shrimp", 2)
     ls("catfish", 14)
     ls("whitefish", 19)
     ls("walleye", 0)
-}*/
+}

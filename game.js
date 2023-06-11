@@ -1,7 +1,7 @@
 "use strict"
 
-const internalVer = "0.2023.06.10.06"
-let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1, settings
+const internalVer = "0.2023.06.10.07"
+let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1
 
 class Fish {
     constructor(xp, sellPrice, quantity, tier) {
@@ -181,8 +181,17 @@ function catchFish() {
     let catchAmount = Math.floor(Math.random() * (toolList.get(curTool).catchRange + 1) + toolList.get(curTool).minCatch)
     let af = $("addFish")
     af.innerHTML = ""
+    const rodSpr = document.querySelector("img.rod")
 
-    document.querySelector("img.rod").src = `assets/tools/${curTool}.png`
+    rodSpr.src = `assets/tools/${curTool}.png`
+
+    if (curTool.includes("Spear")) {
+        rodSpr.style.top = "16px"
+        rodSpr.style.left = "160px"
+    } else if (curTool.includes("Rod")) {
+        rodSpr.style.top = "120px"
+        rodSpr.style.left = "216px"
+    }
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1))
@@ -230,7 +239,7 @@ function catchFish() {
 
             if (researchXp >= nextResearchReq) {
                 researchXp -= nextResearchReq
-                increaseResearchTier()
+                increaseResearchTier(true)
             }
             showResearch()
         }
@@ -250,7 +259,7 @@ function catchFish() {
     }
     updateFishList()
 
-    document.querySelector("img.rod").style.visibility = "visible"
+    rodSpr.style.visibility = "visible"
 }
 
 function timer(time) {
@@ -310,7 +319,7 @@ function changeShop(tab) {
     $(tab).style.display = "block"
 }
 
-function increaseResearchTier() {
+function increaseResearchTier(showBox = false) {
     researchTier++
     nextResearchReq = (nextResearchReq * (3 + 1 / (researchTier + 1))).toFixed(0)
     let researchContent
@@ -330,7 +339,7 @@ function increaseResearchTier() {
             div.id = "rods"
             div.addEventListener("click", () => (changeShop("rodContent")))
             $("rodContent").style.display = "none"
-            document.getElementsByClassName("storeTabs")[0].appendChild(div)
+            document.querySelector(".storeTabs").appendChild(div)
 
             researchContent = "<li>Makeshift Rod</li><li>Maple Rod</li><li>Bamboo Rod</li>"
             break
@@ -354,9 +363,12 @@ function increaseResearchTier() {
     if (document.querySelector(".resResult") !== null) {
         document.querySelector(".middle").removeChild(document.querySelector(".resResult"))
     }
-    const researchResults = dialogBox("resResult", `<h1>Research Lvl ${researchTier}</h1><p>You unlocked: </p><ul>${researchContent}</ul>`)
-    document.querySelector(".middle").appendChild(researchResults)
-    setTimeout(() => { document.querySelector(".middle").removeChild(researchResults) }, 10000)
+
+    if (showBox) {
+        const researchResults = dialogBox("resResult", `<h1>Research Lvl ${researchTier}</h1><p>You unlocked: </p><ul>${researchContent}</ul>`)
+        document.querySelector(".middle").appendChild(researchResults)
+        setTimeout(() => { document.querySelector(".middle").removeChild(researchResults) }, 10000)
+    }
 }
 
 function showResearch() {
@@ -381,7 +393,6 @@ function selectTool(item) {
     if (!toolList.get(item).owned) {
         toolList.get(item).buy()
     } else {
-        console.log(curTool)
         $(`${curTool}Price`).innerHTML = "Owned"
         curTool = item
         $(`${curTool}Price`).innerHTML = "Selected!"
@@ -406,7 +417,9 @@ function dialogBox(cssClass, content) {
 
 function wipeSave() {
     localStorage.clear()
-    location.reload()
+    const warning = dialogBox("saveBox", "<h1>Save deleted!</h1><p>If you didn't mean to wipe your progress (for whatever reason),<br>save again to keep it. If you <strong>did</strong> mean to wipe your save file,<br>restart for changes to take effect.</p>")
+    document.querySelector("body").appendChild(warning)
+    setTimeout(() => { document.querySelector("body").removeChild(warning) }, 10000)
 }
 
 function loadSave() {
@@ -450,50 +463,49 @@ function loadSave() {
             increaseResearchTier()
         }
     }
-    if (lsRC !== null) {
-        buyables[0].owned = (lsRC === "true")
-        if (lsRC === "true") { buyables[0].buyFunc() }
+    if (lsRC === "true") {
+        buyables[0].owned = true
+        buyables[0].buyFunc()
     }
-    if (lsFlintSpear !== null) {
-        toolList.get("flintSpear").owned = (lsFlintSpear === "true") // why is localstorage like this
-        if (lsFlintSpear === "true") { selectTool("flintSpear") }
+    if (lsFlintSpear === "true") { // why is localstorage like this
+        toolList.get("flintSpear").owned = true
+        selectTool("flintSpear")
     }
-    if (lsCopperSpear !== null) {
-        toolList.get("copperSpear").owned = (lsCopperSpear === "true")
-        if (lsCopperSpear === "true") { selectTool("copperSpear") }
+    if (lsCopperSpear === "true") {
+        toolList.get("copperSpear").owned = true
+        selectTool("copperSpear")
     }
-    if (lsBronzeSpear !== null) {
-        toolList.get("bronzeSpear").owned = (lsBronzeSpear === "true")
-        if (lsBronzeSpear === "true") { selectTool("bronzeSpear") }
+    if (lsBronzeSpear === "true") {
+        toolList.get("bronzeSpear").owned = true
+        selectTool("bronzeSpear")
     }
-    if (lsSteelSpear !== null) {
-        toolList.get("steelSpear").owned = (lsSteelSpear === "true")
-        if (lsSteelSpear === "true") { selectTool("steelSpear") }
+    if (lsSteelSpear === "true") {
+        toolList.get("steelSpear").owned = true
+        selectTool("steelSpear")
     }
-    if (lsBadRod !== null) {
-        toolList.get("badRod").owned = (lsBadRod === "true")
-        if (lsBadRod === "true") { selectTool("badRod") }
+    if (lsBadRod === "true") {
+        toolList.get("badRod").owned = true
+        selectTool("badRod")
     }
-    if (lsMapleRod !== null) {
-        toolList.get("mapleRod").owned = (lsMapleRod === "true")
-        if (lsMapleRod === "true") { selectTool("mapleRod") }
+    if (lsMapleRod === "true") {
+        toolList.get("mapleRod").owned = true
+        selectTool("mapleRod")
     }
-    if (lsBambooRod !== null) {
-        toolList.get("bambooRod").owned = (lsBambooRod === "true")
-        if (lsBambooRod === "true") { selectTool("bambooRod") }
+    if (lsBambooRod === "true") {
+        toolList.get("bambooRod").owned = true
+        selectTool("bambooRod")
     }
-    if (lsGraphRod !== null) {
-        toolList.get("graphRod").owned = (lsGraphRod === "true")
-        if (lsGraphRod === "true") { selectTool("graphRod") }
+    if (lsGraphRod === "true") {
+        toolList.get("graphRod").owned = true
+        selectTool("graphRod")
     }
-    if (lsFiberRod !== null) {
-        toolList.get("fiberRod").owned = (lsFiberRod === "true")
-        if (lsFiberRod === "true") { selectTool("fiberRod") }
+    if (lsFiberRod === "true") {
+        toolList.get("fiberRod").owned = true
+        selectTool("fiberRod")
     }
     if (lsTool !== null) {
         $("woodenSpearPrice").innerHTML = "Owned"
-        curTool = lsTool
-        selectTool(curTool)
+        selectTool(lsTool)
     }
     if (lsCD !== null) {
         fishingTimer = lsCD
@@ -577,11 +589,13 @@ function closeSettings(e) {
 }
  
 function openSettings() {
-    const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button><br><input type='checkbox' id='highNumAcc' onclick=updateSettings()><label for='highNumAcc'>Higher decimal accuracy</label>")
-    document.querySelector("body").appendChild(settings)
-    settings.querySelector("#highNumAcc").checked = (numAccuracy === 2)
+    if (document.querySelector(".settingsBox") === null) {
+        const settings = dialogBox("settingsBox", "<h1>Options</h1><button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button><br><input type='checkbox' id='highNumAcc' onclick=updateSettings()><label for='highNumAcc'>Higher decimal accuracy</label>")
+        document.querySelector("body").appendChild(settings)
+        settings.querySelector("#highNumAcc").checked = (numAccuracy === 2)
 
-    document.addEventListener("click", closeSettings)
+        document.addEventListener("click", closeSettings)
+    }
 }
 
 function updateSettings() {

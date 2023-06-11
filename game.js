@@ -1,6 +1,6 @@
 "use strict"
 
-const internalVer = "0.2023.06.10.07"
+const internalVer = "0.2023.06.10.08"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1
 
 class Fish {
@@ -97,13 +97,13 @@ fishList.set("basa", new Fish(40, 25, 0, 8))
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
 toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }))
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }))
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 50, 250, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
-toolList.set("steelSpear", new Tool("Steel Spear", 110, 390, 4, 2, 4.5, 4200, false, false, () => { $("steelSpearPrice").innerHTML = "Owned" }))
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 60, 240, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }))
+toolList.set("steelSpear", new Tool("Steel Spear", 140, 510, 4, 2, 4.5, 8800, false, false, () => { $("steelSpearPrice").innerHTML = "Owned" }))
 toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }))
-toolList.set("mapleRod", new Tool("Maple Rod", 30, 90, 2, 1, 3.8, 500, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 140, 2, 2, 3.6, 950, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
-toolList.set("graphRod", new Tool("Graphite Rod", 100, 290, 3, 2, 3.4, 2500, false, false, () => { $("graphRodPrice").innerHTML = "Owned" }))
-toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 520, 5, 2, 3.2, 5900, false, false, () => { $("fiberRodPrice").innerHTML = "Owned" }))
+toolList.set("mapleRod", new Tool("Maple Rod", 25, 95, 2, 1, 3.8, 480, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }))
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 130, 2, 2, 3.6, 900, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }))
+toolList.set("graphRod", new Tool("Graphite Rod", 120, 400, 3, 2, 3.4, 3500, false, false, () => { $("graphRodPrice").innerHTML = "Owned" }))
+toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 570, 5, 2, 3.2, 15000, false, false, () => { $("fiberRodPrice").innerHTML = "Owned" }))
 //toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("i see.") }))
 
 function findToolName(name) {
@@ -257,6 +257,9 @@ function catchFish() {
     if (addedFishes === 0) {
         $("moneyGain").innerHTML = "You caught nothing :("
     }
+    else {
+        $("moneyGain").innerHTML = ""
+    }
     updateFishList()
 
     rodSpr.style.visibility = "visible"
@@ -321,7 +324,7 @@ function changeShop(tab) {
 
 function increaseResearchTier(showBox = false) {
     researchTier++
-    nextResearchReq = (nextResearchReq * (3 + 1 / (researchTier + 1))).toFixed(0)
+    nextResearchReq = (nextResearchReq * (2 + 1 / (researchTier + 1))).toFixed(0)
     let researchContent
     
     switch (researchTier) {

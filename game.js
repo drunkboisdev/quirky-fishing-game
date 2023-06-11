@@ -606,7 +606,7 @@ function updateSettings() {
     updateToolInfo()
 }
 
-function exampleSave() {
+/*function exampleSave() {
     ls("money", 10004)
     ls("researchXp", 230000)
     ls("researchTier", 5)
@@ -626,4 +626,4 @@ function exampleSave() {
     ls("catfish", 14)
     ls("whitefish", 19)
     ls("walleye", 0)
-}
+}*/

@@ -4,12 +4,11 @@ const internalVer = "0.2023.06.10.08"
 let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, money = 0, textTimer = 0, researchTier = 0, researchCentreTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1
 
 class Fish {
-    constructor(xp, sellPrice, quantity, tier, countable = false) {
+    constructor(xp, sellPrice, quantity, tier) {
         this.xp = xp
         this.sellPrice = sellPrice
         this.quantity = quantity
         this.tier = tier
-        this.countable = countable
     }
     add(amount) {
         this.quantity += amount
@@ -58,38 +57,6 @@ class Tool {
     }
 }
 
-/*class IdleTool {
-    constructor(name, minRoll, rollRange, tickChance, capacity, cost, unlocked, owned, buyFunc) {
-        this.name = name
-        this.minRoll = minRoll
-        this.rollRange = rollRange
-        this.tickChance = tickChance
-        this.curFish = []
-        this.capacity = capacity
-        this.cost = cost
-        this.unlocked = unlocked
-        this.owned = owned
-        this.buyFunc = buyFunc
-    }
-    buy() {
-        if (!this.owned && money >= this.cost) {
-            money -= this.cost
-            this.owned = true
-            updateMoney()
-            this.buyFunc()
-        }
-    }
-    unlock() {
-        this.unlocked = true
-        const div = document.createElement("div")
-        div.className = "buyButton"
-        div.addEventListener("click", () => { selectTool(findToolName(this.name)) })
-        div.innerHTML = `<p>${this.name}</p><p id=${findToolName(this.name)}Price>$${this.cost}</p>`
-
-        $("netContent").appendChild(div)
-    }
-}*/
-
 class Buyable {
     constructor(name, cost, buyFunc, owned) {
         this.name = name
@@ -108,7 +75,7 @@ class Buyable {
 }
 
 let curTool = "woodenSpear"
-const fishNames = ["perch", "prawn", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"]
+const fishNames = ["perch", "shrimp", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"]
 
 const buyables = [
     new Buyable("rcTier1", 300, () => {
@@ -119,12 +86,12 @@ const buyables = [
 ]
 
 fishList.set("perch", new Fish(3, 2, 0, 1))
-fishList.set("prawn", new Fish(6, 5, 0, 2, true))
+fishList.set("shrimp", new Fish(6, 5, 0, 2))
 fishList.set("catfish", new Fish(10, 8, 0, 3))
 fishList.set("whitefish", new Fish(14, 12, 0, 4))
 fishList.set("walleye", new Fish(19, 13, 0, 5))
 fishList.set("salmon", new Fish(25, 18, 0, 6))
-fishList.set("eel", new Fish(32, 20, 0, 7, true))
+fishList.set("eel", new Fish(32, 20, 0, 7))
 fishList.set("basa", new Fish(40, 25, 0, 8))
 
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }))
@@ -173,7 +140,7 @@ function pickFish(roll) {
     } else if (roll <= 30) {
         fish = "perch"
     } else if (roll <= 70) {
-        fish = "prawn"
+        fish = "shrimp"
     } else if (roll <= 130) {
         fish = "catfish"
     } else if (roll <= 210) {
@@ -194,8 +161,7 @@ function updateFishList() {
     $("fishList").innerHTML = ""
 
     fishList.forEach((v, k) => {
-        const str = (!v.countable || v.quantity == 1) ? `${v.quantity} ${k}` : `${v.quantity} ${k}s`
-        $("fishList").innerHTML += `<li>${str}</li>`
+        $("fishList").innerHTML += `<li>${v.quantity} ${k}</li>`
     })
 }
 
@@ -219,8 +185,13 @@ function catchFish() {
 
     rodSpr.src = `assets/tools/${curTool}.png`
 
-    rodSpr.style.right = "0px"
-    rodSpr.style.bottom = "0px"
+    if (curTool.includes("Spear")) {
+        rodSpr.style.top = "16px"
+        rodSpr.style.left = "160px"
+    } else if (curTool.includes("Rod")) {
+        rodSpr.style.top = "120px"
+        rodSpr.style.left = "216px"
+    }
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1))
@@ -241,7 +212,7 @@ function catchFish() {
             case "perch":
                 newFish[0]++
                 break
-            case "prawn":
+            case "shrimp":
                 newFish[1]++
                 break
             case "catfish":
@@ -324,7 +295,7 @@ function sell() {
     $("addFish").innerHTML = ""
 
     fishList.get("perch").sell()
-    fishList.get("prawn").sell()
+    fishList.get("shrimp").sell()
     fishList.get("catfish").sell()
     fishList.get("whitefish").sell()
     fishList.get("walleye").sell()
@@ -482,7 +453,7 @@ function loadSave() {
 
     // this is giving isEven() vibes
     if (lsAcc !== null) {
-        numAccuracy = Number.parseInt(lsAcc)
+        numAccuracy = lsAcc
     }
     if (lsMoney !== null) {
         money = Number.parseInt(lsMoney)
@@ -547,7 +518,7 @@ function loadSave() {
         fishList.get("perch").quantity = Number.parseInt(lsPerch)
     }
     if (lsShrimp !== null) {
-        fishList.get("prawn").quantity = Number.parseInt(lsShrimp)
+        fishList.get("shrimp").quantity = Number.parseInt(lsShrimp)
     }
     if (lsCatfish !== null) {
         fishList.get("catfish").quantity = Number.parseInt(lsCatfish)
@@ -587,7 +558,7 @@ function createSave() {
     ls("curTool", curTool)
     ls("cooldown", fishingTimer)
     ls("perch", fishList.get("perch").quantity)
-    ls("shrimp", fishList.get("prawn").quantity)
+    ls("shrimp", fishList.get("shrimp").quantity)
     ls("catfish", fishList.get("catfish").quantity)
     ls("whitefish", fishList.get("whitefish").quantity)
     ls("walleye", fishList.get("walleye").quantity)

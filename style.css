@@ -17,17 +17,25 @@ button {
     font-size: 0;
 }
 
+.pond {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    user-select: none;
+}
+
 .rod {
     position: absolute;
-    right: 0px;
-    bottom: 0px;
+    top: 120px;
+    left: 216px;
     visibility: hidden;
 }
 
 .leftBar {
     display: flexbox;
     flex-direction: column;
-    width: 35vw;
+    width: 30vw;
     height: 100vh;
     border: 1px solid #aaaaaa;
     box-sizing: border-box;
@@ -49,7 +57,7 @@ button {
     flex-direction: column;
     right: 0;
     top: 0;
-    width: 35vw;
+    width: 30vw;
     height: 100vh;
     border: 1px solid #aaa;
     box-sizing: border-box;
@@ -165,10 +173,9 @@ button {
 .middle {
     position: absolute;
     top: 0;
-    left: 35vw;
-    width: 30vw;
+    left: 30vw;
+    width: 40vw;
     height: 100vh;
-    background-image: url("assets/lake.png");
 }
 
 .resResult {

@@ -3,26 +3,11 @@ body {
     padding: 0 0;
     font-family: "Calibri";
     height: 100%;
+    user-select: none;
 }
 
 button {
     padding: 15px 24px;
-}
-
-.hd {
-    visibility: hidden;
-}
-
-.invis {
-    font-size: 0;
-}
-
-.pond {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    user-select: none;
 }
 
 .rod {
@@ -35,20 +20,19 @@ button {
 .leftBar {
     display: flexbox;
     flex-direction: column;
-    width: 30vw;
+    width: calc(50vw - 288px);
     height: 100vh;
     border: 1px solid #aaaaaa;
     box-sizing: border-box;
 }
 
-.fishInfo {
-    height: 66%;
-    border-bottom: 1px solid #aaaaaa;
-    padding-left: 12px;
-}
-
-.toolInfo {
-    padding-left: 12px;
+.middle {
+    position: absolute;
+    top: 0;
+    left: calc(50vw - 288px);
+    width: 576px;
+    height: 100vh;
+    background-image: url("assets/newLake.png");
 }
 
 .rightBar {
@@ -57,33 +41,16 @@ button {
     flex-direction: column;
     right: 0;
     top: 0;
-    width: 30vw;
+    width: calc(50vw - 288px);
     height: 100vh;
     border: 1px solid #aaa;
     box-sizing: border-box;
 }
 
-.store {
+.fishInfo {
     height: 66%;
     border-bottom: 1px solid #aaaaaa;
-}
-.store h1 {
-    margin-left: 12px;
-}
-
-#research {
     padding-left: 12px;
-}
-
-.buyButton {
-    display: flex;
-    width: 80%;
-    padding: 6px;
-    margin: auto;
-    margin-top: 12px;
-    justify-content: space-between;
-    border: 1px solid #aaa;
-    cursor: pointer;
 }
 
 .fishList {
@@ -97,14 +64,17 @@ button {
     list-style-type: "+  ";
 }
 
-.saveBox {
-    position: absolute;
-    top: 25%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1px solid black;
-    padding: 0 8px;
-    background-color: white;
+.toolInfo {
+    padding-left: 12px;
+}
+
+.store {
+    height: 66%;
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.store h1 {
+    margin-left: 12px;
 }
 
 .storeTabs {
@@ -131,6 +101,41 @@ button {
 
 #rods {
     cursor: pointer;
+}
+
+#research {
+    padding-left: 12px;
+}
+
+.buyButton {
+    display: flex;
+    width: 80%;
+    padding: 6px;
+    margin: auto;
+    margin-top: 12px;
+    justify-content: space-between;
+    border: 1px solid #aaa;
+    cursor: pointer;
+}
+
+.resResult {
+    position: absolute;
+    top: 75%;
+    right: -10%;
+    padding: 0 24px 16px;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    background-color: white;
+}
+
+.saveBox {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    padding: 0 8px;
+    background-color: white;
 }
 
 .settings {
@@ -168,22 +173,4 @@ button {
 
 .danger:hover {
     background-color: #ffd8d2;
-}
-
-.middle {
-    position: absolute;
-    top: 0;
-    left: 30vw;
-    width: 40vw;
-    height: 100vh;
-}
-
-.resResult {
-    position: absolute;
-    top: 75%;
-    right: -10%;
-    padding: 0 24px 16px;
-    transform: translate(-50%, -50%);
-    border: 1px solid black;
-    background-color: white;
 }

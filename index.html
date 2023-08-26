@@ -6,64 +6,71 @@
         <link rel="stylesheet" href="style.css">
         <link rel="icon" type="image/x-icon" href="assets/favicon.png">
     </head>
-    <body id="bg" onload=init()>
+    <body id="bg">
+        <div id="wrapper"> <!--just in case-->
 
-    <div class="leftBar">
-        <div class="fishInfo">
-            <h1>Fish</h1>
-            <button onclick=sell()>Sell fish</button>
-            <p id="timer">Ready to cast!</p>
-            <p id="catch"></p>
-            <p>Your fish</p>
-            <div class="fishList">
-                <ul id="fishList"></ul>
-                <ul id="addFish"></ul>
-            </div>
-            <br>
-            <p id="moneyGain"></p>
-            <p id="money">You have $0</p>
-        </div>
-        <div class="toolInfo">
-            <h1 id="toolName"></h1>
-            <p id="toolPower"></p>
-            <p id="toolCooldown"></p>
-            <p id="toolAvgCatch"></p>
-            <p id="toolFishPerSec"></p>
-        </div>
-    </div>
-    <div class="middle" onclick=fish()>
-        <img class="rod">
-        </div>
-    </div>
-    <div class="rightBar">
-        <img src="assets/settings.png" class="settings" onclick=openSettings()>
-        <div class="store">
-            <h1>Store</h1>
-            <div class="storeTabs">
-                <div id="spears" onclick="changeShop('spearContent')">Spears</div>
-            </div>
-            <div id="storeContent">
-                <div class="storeTab" id="spearContent">
-                    <div class="buyButton" onclick="selectTool('woodenSpear')">
-                        <p>Wooden Spear</p>
-                        <p id="woodenSpearPrice">Selected!</p>
+            <div id="leftSection">
+                <div id="fishInfo">
+                    <h1>Fish</h1>
+                    <button id="sellButton">Sell fish</button>
+                    <p id="timer">Ready to cast!</p>
+                    <p id="catch"></p>
+                    <p>Your fish</p>
+                    <div id="fishListWrapper">
+                        <ul id="fishList"></ul>
+                        <ul id="addFish"></ul>
                     </div>
-                    <div class="buyButton" onclick="selectTool('flintSpear')">
-                        <p>Flint Spear</p>
-                        <p id="flintSpearPrice">$80</p>
+                    <br>
+                    <p id="moneyGain"></p>
+                    <p id="money">You have $0</p>
+                </div>
+
+                <div id="toolInfo">
+                    <h1 id="toolName"></h1>
+                    <p id="toolPower"></p>
+                    <p id="toolCooldown"></p>
+                    <p id="toolAvgCatch"></p>
+                    <p id="toolFishPerSec"></p>
+                </div>
+            </div>
+
+            <div id="middleSection">
+                <a href="changelog.txt">changelog</a>
+                <img id="rod">
+            </div>
+
+            <div id="rightSection">
+                <img src="assets/settings.png" id="settings">
+                <div id="store">
+                    <h1>Store</h1>
+                    <div id="storeTabs">
+                        <div id="spears">Spears</div>
+                    </div>
+                    <div id="storeContent">
+                        <div class="storeTab" id="spearContent">
+                            <div class="buyButton" id="woodenSpear">
+                                <p>Wooden Spear</p>
+                                <p id="woodenSpearPrice">Selected!</p>
+                            </div>
+                            <div class="buyButton" id="flintSpear">
+                                <p>Flint Spear</p>
+                                <p id="flintSpearPrice">$80</p>
+                            </div>
+                        </div>
+                        <div class="storeTab" id="rodContent"></div>
                     </div>
                 </div>
-                <div class="storeTab" id="rodContent"></div>
+
+                <div id="research">
+                    <h1>Research</h1>
+                    <div class="buyButton" id="researchCentre">
+                        <p id="resCentreButton">Research centre</p>
+                        <p name="price">$300</p>
+                    </div>
+                </div>
+
             </div>
         </div>
-        <div id="research">
-            <h1>Research</h1>
-            <div class="buyButton" onclick="researchCentre.buy()">
-                <p id="resCentreButton">Research centre</p>
-                <p name="price"></p>
-            </div>
-        </div>
-    </div>
     </body>
     <script src="game.js"></script>
 </html>

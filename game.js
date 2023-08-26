@@ -1,7 +1,14 @@
 "use strict"
 
-const internalVer = "0.2023.08.xx.01";
-let currentFish = "", fishList = new Map(), toolList = new Map(), fishingTimer = 0, fishStart, money = 0, textTimer = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1;
+const internalVer = "0.2023.08.xx.01"; // track number of commits kinda? except not really because i forget sometimes
+let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1, curTool = "woodenSpear";
+const fishList = new Map(), toolList = new Map();
+
+// helper functions woohoo
+function $(m) { return document.getElementById(m) }
+function updateMoney() { $("money").innerHTML = `You have $${money}` }
+//function ls(k, v) { localStorage.setItem(k, v) }
+//function lg(k) { return localStorage.getItem(k) }
 
 class Fish {
     constructor(name, sellPrice, quantity, tier, countable = false) {
@@ -46,6 +53,7 @@ class Tool {
         this.unlocked = true;
         const div = document.createElement("div");
         div.className = "buyButton";
+        div.id = `${findToolName(this.name)}Buy`;
         div.addEventListener("click", () => { selectTool(findToolName(this.name)) });
         div.innerHTML = `<p>${this.name}</p><p id=${findToolName(this.name)}Price>$${this.cost}</p>`;
 
@@ -57,28 +65,9 @@ class Tool {
     }
 }
 
-class Buyable {
-    constructor(name, cost, buyFunc, owned) {
-        this.name = name;
-        this.cost = cost;
-        this.buyFunc = buyFunc;
-        this.owned = owned;
-    }
-    buy() {
-        if (!this.owned && this.cost <= money) {
-            money -= this.cost;
-        }
-        this.owned = true;
-        this.buyFunc();
-    }
-}
-
-let curTool = "woodenSpear";
-
-let researchCentre = {
+const researchCentre = {
     tier: 0,
     get() {
-        updateResearch();
         this.tier++;
         $("resCentreButton").innerHTML = `Tier ${this.tier+1} research centre`
         document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${10 ** this.tier * 300}`;
@@ -92,6 +81,7 @@ let researchCentre = {
     },
 }
 
+// probably a better way to do this
 fishList.set("perch", new Fish("perch", 2, 0, 1));
 fishList.set("prawn", new Fish("prawn", 5, 0, 2, true));
 fishList.set("catfish", new Fish("catfish", 8, 0, 3));
@@ -121,11 +111,6 @@ function findToolName(name) {
     return n;
 }
 
-function $(m) { return document.getElementById(m) }
-function updateMoney() { $("money").innerHTML = `You have $${money}` }
-//function ls(k, v) { localStorage.setItem(k, v) }
-//function lg(k) { return localStorage.getItem(k) }
-
 function sumFish() {
     let sum = 0;
     fishList.forEach((v) => { sum += v.quantity });
@@ -141,7 +126,7 @@ function sumFishSell() {
 function pickFish(roll) {
     let fish;
     fishList.forEach((v) => {
-        if (roll >= 10 * v.tier ** 2 - 10 * v.tier + 10 && roll < 10 * (v.tier+1) ** 2 - 10 * (v.tier+1) + 10) { fish = v.name; } // i can't fucking believe i'm using polynomials in a quirky fishing game
+        if (roll >= 10 * v.tier ** 2 - 10 * v.tier + 5 && roll < 10 * (v.tier+1) ** 2 - 10 * (v.tier+1) + 5) { fish = v.name; } // i can't fucking believe i'm using polynomials in a quirky fishing game
     });
     if (fish) { return fish; }
     return "nothing";
@@ -156,7 +141,7 @@ function updateFishList() {
 }
 
 function updateToolInfo() {
-    const nothingChance = toolList.get(curTool).minRoll > 10 ? 1 : 1 - ((10 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch);
+    const nothingChance = toolList.get(curTool).minRoll > 5 ? 1 : 1 - ((5 - toolList.get(curTool).minRoll) / (toolList.get(curTool).minRoll + toolList.get(curTool).rollRange)) ** (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch);
     const avgFish = (toolList.get(curTool).catchRange / 2 + toolList.get(curTool).minCatch) * nothingChance;
 
     $("toolName").innerHTML = toolList.get(curTool).name;
@@ -167,11 +152,11 @@ function updateToolInfo() {
 }
 
 function catchFish() {
-    let roll = [];
+    const roll = [];
     let catchAmount = Math.floor(Math.random() * (toolList.get(curTool).catchRange + 1) + toolList.get(curTool).minCatch);
     let af = $("addFish");
     af.innerHTML = "";
-    const rodSpr = document.querySelector("img.rod");
+    const rodSpr = document.querySelector("#rod");
 
     rodSpr.src = `assets/tools/${curTool}.png`;
 
@@ -179,8 +164,8 @@ function catchFish() {
         rodSpr.style.top = "500px";
         rodSpr.style.left = "360px";
     } else if (curTool.includes("Rod")) {
-        rodSpr.style.top = "120px";
-        rodSpr.style.left = "216px";
+        rodSpr.style.top = "500px";
+        rodSpr.style.left = "360px";
     }
 
     for (let i = 0; i < catchAmount; i++) {
@@ -191,7 +176,7 @@ function catchFish() {
             fishList.get(roll[i]).add(1);
         }
     }
-    let newFish = [];
+    const newFish = [];
 
     for (let i = 0; i < fishList.size; i++) { newFish[i] = 0; }
 
@@ -230,11 +215,10 @@ function catchFish() {
                 researchXp -= nextResearchReq;
                 increaseResearchTier(true);
             }
-            updateResearch();
         }
     }
 
-    let fishNames = ["perch", "prawn", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"];
+    const fishNames = ["perch", "prawn", "catfish", "whitefish", "walleye", "salmon", "eel", "basa"];
     let addedFishes = 0;
     for (let i = 0; i < newFish.length; i++) {
         if (newFish[i] !== 0) {
@@ -254,7 +238,7 @@ function gameLoop() {
     if (msElapsed < toolList.get(curTool).cooldown * 1000) { $("timer").innerHTML = `Wait ${(toolList.get(curTool).cooldown - msElapsed / 1000).toFixed(numAccuracy)} seconds before casting again.`; }
     else {
         $("timer").innerHTML = `Ready to cast!`;
-        document.querySelector("img.rod").style.visibility = "hidden";
+        document.querySelector("#rod").style.visibility = "hidden";
     }
     fishingTimer = toolList.get(curTool).cooldown * 1000 - msElapsed;
 
@@ -313,7 +297,7 @@ function increaseResearchTier(showBox = false) {
             div.id = "rods";
             div.addEventListener("click", () => (changeShop("rodContent")));
             $("rodContent").style.display = "none";
-            document.querySelector(".storeTabs").appendChild(div);
+            document.querySelector("#storeTabs").appendChild(div);
 
             researchContent = "<li>Makeshift Rod</li><li>Maple Rod</li><li>Bamboo Rod</li>";
             break;
@@ -333,34 +317,38 @@ function increaseResearchTier(showBox = false) {
             toolList.get("fiberRod").unlock();
             researchContent = "<li>Fiberglass Rod</li>";
             break;
+        default:
+            researchContent = "<li>Nothing...</li><li>If you haven't already, I recommend going outside</li>";
     }
     if (document.querySelector(".resResult") !== null) {
-        document.querySelector(".middle").removeChild(document.querySelector(".resResult"));
+        document.querySelector("#middleSection").removeChild(document.querySelector(".resResult"));
     }
 
     if (showBox) {
         const researchResults = dialogBox("resResult", `Research Lvl ${researchTier}`, "You unlocked:", `<ul>${researchContent}</ul>`);
-        document.querySelector(".middle").appendChild(researchResults);
-        setTimeout(() => { document.querySelector(".middle").removeChild(researchResults) }, 10000);
+        document.querySelector("#middleSection").appendChild(researchResults);
+        setTimeout(() => { document.querySelector("#middleSection").removeChild(researchResults) }, 10000);
     }
 }
 
 function updateResearch() {
-    let p = $("researchDisp");
-    let tier = $("researchTierDisp");
-    if (p === null) {
-        p = document.createElement("p");
-        p.id = "researchDisp";
-        $("research").appendChild(p);
+    if (researchCentre.tier > 0) {
+        let p = $("researchDisp");
+        let tier = $("researchTierDisp");
+        if (p === null) {
+            p = document.createElement("p");
+            p.id = "researchDisp";
+            $("research").appendChild(p);
+        }
+        if (tier === null) {
+            tier = document.createElement("p");
+            tier.id = "researchTierDisp";
+            $("research").appendChild(tier);
+        }
+        
+        p.innerHTML = `${+(researchXp / nextResearchReq * 100).toFixed(numAccuracy)}% research finished`;
+        tier.innerHTML = `Research level ${researchTier}`;
     }
-    if (tier === null) {
-        tier = document.createElement("p");
-        tier.id = "researchTierDisp";
-        $("research").appendChild(tier);
-    }
-    
-    p.innerHTML = `${(researchXp / nextResearchReq).toFixed(2)}% research finished`;
-    tier.innerHTML = `Level ${researchTier}`;
 }
 
 function selectTool(item) {
@@ -374,6 +362,27 @@ function selectTool(item) {
 
 function init() {
     loadSave();
+
+    document.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
+            e.preventDefault();
+    
+            createSave();
+        } if (e.key === "Tab") { e.preventDefault(); }
+    })
+    
+    $("middleSection").addEventListener("click", fish);
+    $("sellButton").addEventListener("click", sell);
+    $("spears").addEventListener("click", changeShop("spearContent"));
+    $("settings").addEventListener("click", openSettings);
+
+    const shopTabs = document.getElementsByClassName("storeTab");
+    for (let i = 0; i < shopTabs.length; i++) {
+        const shopTools = document.querySelectorAll("#store.buyButton");
+
+        for (let j = 0; j < shopTools.length; j++) { shopTools[j].addEventListener("click", selectTool(shopTools[j].id)); }
+    }
+    $("researchCentre").addEventListener("click", researchCentre.buy());
 
     updateToolInfo();
     updateFishList();
@@ -394,40 +403,53 @@ function dialogBox(cssClass, header = null, bodyText = null, special = null) {
 
 function wipeSave() { // fix this later
     localStorage.clear();
-    const warning = dialogBox("saveBox", "Save deleted!", "If you didn't mean to wipe your progress (for whatever reason),<br>save again to keep it. If you <strong>did</strong> mean to wipe your save file,<br>restart for changes to take effect.");
+    currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1;
+    researchCentre.tier = 0;
+    fishList.forEach((v) => { v.quantity = 0; })
+    toolList.forEach((v) => {
+        if (v.name !== "Wooden Spear") { v.owned = false; }
+        v.unlocked = false;
+    })
+    selectTool("woodenSpear");
+    init();
+    console.log("save quote unquote deleted");
+
+    /*const warning = dialogBox("saveBox", "Are you sure?", "Your save file will <em>NOT</em> be recoverable if you do this." and then buttons go here);
     document.querySelector("body").appendChild(warning);
-    setTimeout(() => { document.querySelector("body").removeChild(warning) }, 10000);
+    setTimeout(() => { document.querySelector("body").removeChild(warning) }, 10000);*/
 }
 
 function loadSave() {
-    let s = atob(localStorage.getItem("save")); // 44 total lines for new save system (vs 141 before)
-    // prunes invalid characters
-    s = s.replace(/\\n/g, "\\n")
-        .replace(/\\'/g, "\\'")
-        .replace(/\\"/g, '\\"')
-        .replace(/\\&/g, "\\&")
-        .replace(/\\r/g, "\\r")
-        .replace(/\\t/g, "\\t")
-        .replace(/\\b/g, "\\b")
-        .replace(/\\f/g, "\\f");
-    s = s.replace(/[\u0000-\u0019]+/g,"");
-    const o = JSON.parse(s);
-
-    money = o.money;
-    numAccuracy = o.settings.numAcc;
-    researchXp = o.res.xp;
-    for (let i = 0; i < o.res.tier; i++) { increaseResearchTier(); }
-    for (let i = 0; i < o.res.centreTier; i++) { researchCentre.get(); }
-    document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${10 ** researchCentre.tier * 300}`;
-
-    for (const t in o.toolsOwned) {
-        toolList.get(t).owned = o.toolsOwned[t];
-        if (toolList.get(t).owned) { selectTool(t); }
+    if (localStorage.getItem("save") !== null) {
+        let s = atob(localStorage.getItem("save"));
+        // prunes invalid characters
+        s = s.replace(/\\n/g, "\\n")
+            .replace(/\\'/g, "\\'")
+            .replace(/\\"/g, '\\"')
+            .replace(/\\&/g, "\\&")
+            .replace(/\\r/g, "\\r")
+            .replace(/\\t/g, "\\t")
+            .replace(/\\b/g, "\\b")
+            .replace(/\\f/g, "\\f");
+        s = s.replace(/[\u0000-\u0019]+/g,"");
+        const o = JSON.parse(s);
+    
+        money = o.money;
+        numAccuracy = o.settings.numAcc;
+        researchXp = o.res.xp;
+        for (let i = 0; i < o.res.tier; i++) { increaseResearchTier(); }
+        for (let i = 0; i < o.res.centreTier; i++) { researchCentre.get(); }
+        document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${10 ** researchCentre.tier * 300}`;
+    
+        for (const t in o.toolsOwned) {
+            toolList.get(t).owned = o.toolsOwned[t];
+            if (toolList.get(t).owned) { selectTool(t); }
+        }
+        for (const f in o.fish) { fishList.get(f).quantity = o.fish[f]; }
+        selectTool(o.curTool);
+        fishStart = o.cdstart;
+        fishingTimer = toolList.get(curTool).cooldown * 1000 - (new Date().getTime() - o.cdstart)   
     }
-    for (const f in o.fish) { fishList.get(f).quantity = o.fish[f]; }
-    selectTool(o.curTool);
-    fishStart = o.cdstart;
-    fishingTimer = toolList.get(curTool).cooldown * 1000 - (new Date().getTime() - o.cdstart)
 }
 
 function createSave() {
@@ -453,18 +475,10 @@ function createSave() {
     setTimeout(() => { document.querySelector("body").removeChild(save) }, 2000);
 }
 
-document.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") { // look at me, being considerate of macOS for once
-        e.preventDefault();
-
-        createSave();
-    } if (e.key === "Tab") { e.preventDefault(); }
-})
-
 function closeSettings(e) {
     const settings = document.querySelector(".settingsBox");
     if (settings !== null) {
-        if (!settings.contains(e.target) && !document.querySelector(".settings").contains(e.target)) {
+        if (!settings.contains(e.target) && !$("settings").contains(e.target)) {
             document.querySelector("body").removeChild(document.querySelector(".settingsBox"));
             document.removeEventListener("click", closeSettings);
         }
@@ -500,3 +514,6 @@ function exampleSave() {
     fishStart = 1692800000000;
     createSave();
 }
+
+// alright lets get this show started
+addEventListener("load", init);

@@ -10,14 +10,14 @@ button {
     padding: 15px 24px;
 }
 
-.rod {
+#rod {
     position: absolute;
     top: 120px;
     left: 216px;
     visibility: hidden;
 }
 
-.leftBar {
+#leftSection {
     display: flexbox;
     flex-direction: column;
     width: calc(50vw - 288px);
@@ -26,7 +26,7 @@ button {
     box-sizing: border-box;
 }
 
-.middle {
+#middleSection {
     position: absolute;
     top: 0;
     left: calc(50vw - 288px);
@@ -35,7 +35,7 @@ button {
     background-image: url("assets/newLake.png");
 }
 
-.rightBar {
+#rightSection {
     position: absolute;
     display: flexbox;
     flex-direction: column;
@@ -47,13 +47,14 @@ button {
     box-sizing: border-box;
 }
 
-.fishInfo {
-    height: 66%;
+#fishInfo {
+    height: 60%;
     border-bottom: 1px solid #aaaaaa;
     padding-left: 12px;
+    overflow: auto;
 }
 
-.fishList {
+#fishListWrapper {
     display: flex;
     position: relative;
     bottom: 16px;
@@ -64,25 +65,28 @@ button {
     list-style-type: "+  ";
 }
 
-.toolInfo {
+#toolInfo {
     padding-left: 12px;
+    height: 40%;
+    overflow: auto;
 }
 
-.store {
-    height: 66%;
+#store {
+    height: 70%;
     border-bottom: 1px solid #aaaaaa;
+    overflow: auto;
 }
 
-.store h1 {
+#store h1 {
     margin-left: 12px;
 }
 
-.storeTabs {
+#storeTabs {
     width: 100%;
     display: flex;
 }
 
-.storeTabs div {
+#storeTabs div {
     width: 50%;
     border: 1px solid #aaa;
     border-bottom: none;
@@ -105,6 +109,8 @@ button {
 
 #research {
     padding-left: 12px;
+    height: 30%;
+    overflow: auto;
 }
 
 .buyButton {
@@ -138,7 +144,7 @@ button {
     background-color: white;
 }
 
-.settings {
+#settings {
     position: absolute;
     right: 20px;
     top: 20px;

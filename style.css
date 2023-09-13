@@ -1,3 +1,26 @@
+* {
+    box-sizing: border-box;
+}
+/*thank you to w3schools
+
+.width-1 { width:8.33% }
+.width-2 { width:16.66% }
+.width-3 { width:25% }
+.width-4 { width:33.33% }
+.width-5 { width:41.66% }
+.width-6 { width:50% }
+.width-7 { width:58.33% }
+.width-8 { width:66.66% }
+.width-9 { width:75% }
+.width-10 { width:83.33% }
+.width-11 { width:91.66% }
+.width-12 { width:100% }
+
+[class*="width-"] {
+    float: left;
+    padding: 15px;
+}*/
+
 body {
     margin: 0 0;
     padding: 0 0;
@@ -12,8 +35,6 @@ button {
 
 #rod {
     position: absolute;
-    top: 120px;
-    left: 216px;
     visibility: hidden;
 }
 
@@ -23,16 +44,16 @@ button {
     width: calc(50vw - 288px);
     height: 100vh;
     border: 1px solid #aaaaaa;
-    box-sizing: border-box;
 }
 
 #middleSection {
+    display: flex;
+    flex-flow: column;
     position: absolute;
     top: 0;
     left: calc(50vw - 288px);
     width: 576px;
     height: 100vh;
-    background-image: url("assets/newLake.png");
 }
 
 #rightSection {
@@ -44,7 +65,6 @@ button {
     width: calc(50vw - 288px);
     height: 100vh;
     border: 1px solid #aaa;
-    box-sizing: border-box;
 }
 
 #fishInfo {
@@ -52,6 +72,7 @@ button {
     border-bottom: 1px solid #aaaaaa;
     padding-left: 12px;
     overflow: auto;
+    background-color: white;
 }
 
 #fishListWrapper {
@@ -69,12 +90,30 @@ button {
     padding-left: 12px;
     height: 40%;
     overflow: auto;
+    background-color: white;
+}
+
+#fishing {
+    flex: 0 1 1080px;
+    max-height: 100vh;
+    background-image: url("assets/newLake.png");
+}
+
+#midMenu {
+    flex: 0 1 auto;
+    position: absolute;
+    bottom: 0;
+    background-color: white;
+    width: 100%;
+    padding: 9px;
+    border-top: 1px solid #aaa;
 }
 
 #store {
     height: 70%;
     border-bottom: 1px solid #aaaaaa;
     overflow: auto;
+    background-color: white;
 }
 
 #store h1 {
@@ -111,6 +150,7 @@ button {
     padding-left: 12px;
     height: 30%;
     overflow: auto;
+    background-color: white;
 }
 
 .buyButton {
@@ -179,4 +219,37 @@ button {
 
 .danger:hover {
     background-color: #ffd8d2;
+}
+
+@media screen and (max-width:992px) {
+    #leftSection {
+        width: 30vw;
+    }
+    #middleSection {
+        left: 30vw;
+        width: 40vw;
+    }
+    #rightSection {
+        right: 0;
+        width: 30vw;
+    }
+}
+
+@media screen and (max-width:576px) {
+    #leftSection {
+        height: 30vh;
+        width: 100vw;
+    }
+    #middleSection {
+        height: 40vh;
+        width: 100vw;
+        left: 0;
+        top: 30vh;
+    }
+    #rightSection {
+        height: 30vh;
+        width: 100vw;
+        top: 70vh;
+        left: 0;
+    }
 }

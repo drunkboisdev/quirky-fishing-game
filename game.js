@@ -1,7 +1,7 @@
 "use strict"
 
-const internalVer = "0.2023.08.xx.01"; // track number of commits kinda? except not really because i forget sometimes
-let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1, curTool = "woodenSpear";
+const internalVer = "2023.09.05.01"; // track number of commits kinda? except not really because i forget sometimes (also git just does it for you)
+let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 500, numAccuracy = 1, curTool = "woodenSpear";
 const fishList = new Map(), toolList = new Map();
 
 // helper functions woohoo
@@ -53,7 +53,7 @@ class Tool {
         this.unlocked = true;
         const div = document.createElement("div");
         div.className = "buyButton";
-        div.id = `${findToolName(this.name)}Buy`;
+        div.id = `${findToolName(this.name)}`;
         div.addEventListener("click", () => { selectTool(findToolName(this.name)) });
         div.innerHTML = `<p>${this.name}</p><p id=${findToolName(this.name)}Price>$${this.cost}</p>`;
 
@@ -67,15 +67,16 @@ class Tool {
 
 const researchCentre = {
     tier: 0,
+    cost: 300,
     get() {
         this.tier++;
+        this.cost = 300 * 3 ** (this.tier * 3);
         $("resCentreButton").innerHTML = `Tier ${this.tier+1} research centre`
-        document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${10 ** this.tier * 300}`;
+        document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${this.cost}`;
     },
     buy() {
-        const cost = 10 ** this.tier * 300;
-        if (money >= cost) {
-            money -= cost;
+        if (money >= this.cost) {
+            money -= this.cost;
             this.get();
         }
     },
@@ -161,10 +162,10 @@ function catchFish() {
     rodSpr.src = `assets/tools/${curTool}.png`;
 
     if (curTool.includes("Spear")) {
-        rodSpr.style.top = "500px";
-        rodSpr.style.left = "360px";
+        rodSpr.style.bottom = "29px";
+        rodSpr.style.right = "0px";
     } else if (curTool.includes("Rod")) {
-        rodSpr.style.top = "500px";
+        rodSpr.style.top = "600px";
         rodSpr.style.left = "360px";
     }
 
@@ -279,7 +280,7 @@ function changeShop(tab) {
 
 function increaseResearchTier(showBox = false) {
     researchTier++;
-    nextResearchReq = (nextResearchReq * (2 + 1 / (researchTier + 1))).toFixed(0);
+    nextResearchReq = (nextResearchReq * (2 + researchTier / (researchTier + 1))).toFixed(0);
     let researchContent;
     
     switch (researchTier) {
@@ -373,7 +374,9 @@ function init() {
     
     $("middleSection").addEventListener("click", fish);
     $("sellButton").addEventListener("click", sell);
-    $("spears").addEventListener("click", changeShop("spearContent"));
+    $("spears").addEventListener("click", () => { changeShop("spearContent") });
+    $("woodenSpear").addEventListener("click", () => { selectTool("woodenSpear") });
+    $("flintSpear").addEventListener("click", () => { selectTool("flintSpear") });
     $("settings").addEventListener("click", openSettings);
 
     const shopTabs = document.getElementsByClassName("storeTab");
@@ -410,13 +413,21 @@ function wipeSave() { // fix this later
         if (v.name !== "Wooden Spear") { v.owned = false; }
         v.unlocked = false;
     })
+    const spearButtons = document.querySelectorAll("#spearContent .buyButton");
+    const rodButtons = document.querySelectorAll("#rodContent .buyButton"); // idk maybe this could go into 1 line but whatever im tired
+
+    for (let i = 0; i < spearButtons.length; i++) {
+        if (spearButtons[i].id !== "flintSpear" || spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
+        console.log("remove?")
+    }
+    for (let i = 0; i < rodButtons.length; i++) { $("rodContent").removeChild(rodButtons[i]); }
+
     selectTool("woodenSpear");
     init();
     console.log("save quote unquote deleted");
 
     /*const warning = dialogBox("saveBox", "Are you sure?", "Your save file will <em>NOT</em> be recoverable if you do this." and then buttons go here);
-    document.querySelector("body").appendChild(warning);
-    setTimeout(() => { document.querySelector("body").removeChild(warning) }, 10000);*/
+    document.querySelector("body").appendChild(warning);*/
 }
 
 function loadSave() {
@@ -517,3 +528,6 @@ function exampleSave() {
 
 // alright lets get this show started
 addEventListener("load", init);
+
+// save file lmao
+// eyJtb25leSI6OTAwLCJzZXR0aW5ncyI6eyJudW1BY2MiOjJ9LCJyZXMiOnsieHAiOjU0MzUsInRpZXIiOjMsImNlbnRyZVRpZXIiOjF9LCJ0b29sc093bmVkIjp7Indvb2RlblNwZWFyIjp0cnVlLCJmbGludFNwZWFyIjp0cnVlLCJjb3BwZXJTcGVhciI6dHJ1ZSwiYnJvbnplU3BlYXIiOnRydWUsInN0ZWVsU3BlYXIiOmZhbHNlLCJiYWRSb2QiOnRydWUsIm1hcGxlUm9kIjp0cnVlLCJiYW1ib29Sb2QiOnRydWUsImdyYXBoUm9kIjpmYWxzZSwiZmliZXJSb2QiOmZhbHNlfSwiZmlzaCI6eyJwZXJjaCI6MCwicHJhd24iOjEsImNhdGZpc2giOjE3LCJ3aGl0ZWZpc2giOjE1LCJ3YWxsZXllIjoxNywic2FsbW9uIjowLCJlZWwiOjAsImJhc2EiOjB9LCJjdXJUb29sIjoiYnJvbnplU3BlYXIiLCJjZCI6LTYyNDEyNSwiY2RzdGFydCI6MTY5NDU2NzEyMTQyN30=

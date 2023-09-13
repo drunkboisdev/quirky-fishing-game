@@ -413,18 +413,22 @@ function wipeSave() { // fix this later
         if (v.name !== "Wooden Spear") { v.owned = false; }
         v.unlocked = false;
     })
+    selectTool("woodenSpear");
+
     const spearButtons = document.querySelectorAll("#spearContent .buyButton");
     const rodButtons = document.querySelectorAll("#rodContent .buyButton"); // idk maybe this could go into 1 line but whatever im tired
 
-    for (let i = 0; i < spearButtons.length; i++) {
+    for (let i = 2; i < spearButtons.length; i++) {
+        console.log(spearButtons[i])
         if (spearButtons[i].id !== "flintSpear" || spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
-        console.log("remove?")
     }
     for (let i = 0; i < rodButtons.length; i++) { $("rodContent").removeChild(rodButtons[i]); }
+    $("resCentreButton").innerHTML = "Research centre";
+    document.querySelector("p[name='price']").innerHTML = "$300";
+    if ($("researchDisp") !== null) { $("research").removeChild($("researchDisp")); }
+    if ($("researchTierDisp") !== null) { $("research").removeChild($("researchTierDisp")); }
 
-    selectTool("woodenSpear");
     init();
-    console.log("save quote unquote deleted");
 
     /*const warning = dialogBox("saveBox", "Are you sure?", "Your save file will <em>NOT</em> be recoverable if you do this." and then buttons go here);
     document.querySelector("body").appendChild(warning);*/

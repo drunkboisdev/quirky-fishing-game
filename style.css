@@ -164,7 +164,7 @@ button {
     cursor: pointer;
 }
 
-.resResult {
+#resResult {
     position: absolute;
     top: 75%;
     right: -10%;
@@ -174,7 +174,7 @@ button {
     background-color: white;
 }
 
-.saveBox {
+#saveBox {
     position: absolute;
     top: 25%;
     left: 50%;
@@ -191,7 +191,7 @@ button {
     cursor: pointer;
 }
 
-.settingsBox {
+#settingsBox {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -204,7 +204,7 @@ button {
     user-select: none;
 }
 
-.settingsBox button {
+#settingsBox button {
     padding: 5px 8px;
     display: inline-block;
     margin-right: 5px;
@@ -219,6 +219,26 @@ button {
 
 .danger:hover {
     background-color: #ffd8d2;
+    color: #b11a15;
+    border-color: #b11a15;
+}
+
+#wipeWarning {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    padding: 16px;
+    padding-top: 0;
+    background-color: white;
+}
+
+#wipeWarning button {
+    padding: 5px 8px;
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 5px;
 }
 
 @media screen and (max-width:992px) {

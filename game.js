@@ -394,9 +394,9 @@ function init() {
     setInterval(gameLoop, 10);
 }
 
-function dialogBox(cssClass, header = null, bodyText = null, special = null) {
+function dialogBox(id, header = null, bodyText = null, special = null) {
     const div = document.createElement("div");
-    div.className = cssClass;
+    div.id = id;
     div.innerHTML = "";
     if (header) { div.innerHTML += `<h1>${header}</h1>`; }
     if (bodyText) { div.innerHTML += `<p>${bodyText}</p>`; }
@@ -404,7 +404,17 @@ function dialogBox(cssClass, header = null, bodyText = null, special = null) {
     return div;
 }
 
+function wipeSaveWarning() {
+    const warning = dialogBox("wipeWarning", "Are you sure?", "Your save file will <em>NOT</em> be recoverable if you do this.", "<button class='danger' id='deleteSave'>Yes, I'm sure!</button><button id='cancelDelete'>Cancel</button>");
+    document.querySelector("body").appendChild(warning);
+    $("deleteSave").addEventListener("click", () => { wipeSave() });
+    $("cancelDelete").addEventListener("click", () => { document.querySelector("body").removeChild(warning) })
+}
+
 function wipeSave() { // fix this later
+    document.querySelector("body").removeChild($("wipeWarning"));
+    if ($("settingsBox")) { document.querySelector("body").removeChild($("settingsBox")); }
+
     localStorage.clear();
     currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1;
     researchCentre.tier = 0;
@@ -419,7 +429,6 @@ function wipeSave() { // fix this later
     const rodButtons = document.querySelectorAll("#rodContent .buyButton"); // idk maybe this could go into 1 line but whatever im tired
 
     for (let i = 2; i < spearButtons.length; i++) {
-        console.log(spearButtons[i])
         if (spearButtons[i].id !== "flintSpear" || spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
     }
     for (let i = 0; i < rodButtons.length; i++) { $("rodContent").removeChild(rodButtons[i]); }
@@ -429,9 +438,6 @@ function wipeSave() { // fix this later
     if ($("researchTierDisp") !== null) { $("research").removeChild($("researchTierDisp")); }
 
     init();
-
-    /*const warning = dialogBox("saveBox", "Are you sure?", "Your save file will <em>NOT</em> be recoverable if you do this." and then buttons go here);
-    document.querySelector("body").appendChild(warning);*/
 }
 
 function loadSave() {
@@ -491,20 +497,22 @@ function createSave() {
 }
 
 function closeSettings(e) {
-    const settings = document.querySelector(".settingsBox");
+    const settings = $("settingsBox");
     if (settings !== null) {
         if (!settings.contains(e.target) && !$("settings").contains(e.target)) {
-            document.querySelector("body").removeChild(document.querySelector(".settingsBox"));
+            document.querySelector("body").removeChild($("settingsBox"));
             document.removeEventListener("click", closeSettings);
         }
     }
 }
  
 function openSettings() {
-    if (document.querySelector(".settingsBox") === null) {
-        const settings = dialogBox("settingsBox", "Options", null, "<button onclick=createSave()>Save</button><button class='danger' onclick=wipeSave()>Delete save</button><br><input type='checkbox' id='highNumAcc' onclick=updateSettings()><label for='highNumAcc'>Higher decimal accuracy</label>");
+    if ($("settingsBox") === null) {
+        const settings = dialogBox("settingsBox", "Options", null, "<button onclick=createSave()>Save</button><button class='danger'>Delete save</button><br><input type='checkbox' id='highNumAcc'><label for='highNumAcc'>Higher decimal accuracy</label>");
         document.querySelector("body").appendChild(settings);
         settings.querySelector("#highNumAcc").checked = (numAccuracy === 2);
+        document.querySelector(".danger").addEventListener("click", () => { wipeSaveWarning() });
+        $("highNumAcc").addEventListener("click", () => { updateSettings() });
 
         document.addEventListener("click", closeSettings);
     }

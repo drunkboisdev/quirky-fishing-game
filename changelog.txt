@@ -1,0 +1,136 @@
+=== v1.0 ALPHA - "REWRITE" ===
+Date: 16 September 2023
+
+Additions
+- Autosave, to further help the mobile players out there
+- Favicon!!! (the little icon that appears next to the title of the tab)
+- New middle fishing background
+- A changelog accessible directly from the site (the one you're reading right now)
+- New research centre tiers!
+    - Higher-tier research centres allow you to research much faster
+
+Changes
+- Optimized/rewrote code (for the fourth time in a row)
+    - this took an unbelievably long time because i went over EVERYTHING
+    - expect more of this in the future
+- Research xp is now hidden from the player, instead showing a percentage
+    - Scaling has also been adjusted to account for research centre tiers
+- Shrimp renamed to prawn to better describe intended size
+- Saves are now stored differently
+    - Unfortunately, this means your old save is now invalid
+- Certain stats are now tracked in your save file
+- Changed the version numbering system used (again this is the last one i swear)
+- Reduced chance of catching nothing
+- Delete save option now deletes it instantly
+    - A dialog now appears to confirm if you really want to delete your save
+- Every tool has been rebalanced to fit their category
+    - Spears now catch much more fish, but are slow
+        - Buffed significantly
+    - Rods are fast and catch better fish than Spears
+        - Nerfed slightly
+    - Prices have been adjusted up and down
+- Various other small changes
+
+Bugfixes
+- Eel now uses the proper plural
+- Decimal accuracy setting now behaves properly after reloading a save
+- Fishing cooldown is now calculated properly (i.e. the timer counts down even while tabbed out)
+- Research level up popup no longer says "undefined" when there are no rewards for that level
+- UI now behaves MUCH better when window is resized
+
+PLANNED:
+Additions
+- New tool tier
+
+
+
+=== v0.3 ===
+Date: 11 June 2023
+
+Additions
+- Three new types of fish
+- Options menu
+    - A clickable save button (im so sorry mobile users)
+    - An option to wipe your save
+    - Improved decimal accuracy
+
+Changes
+- Version numbering system changed
+- Fishing power display is now clearer
+- The game now tells you when you catch nothing
+- Resprited every tool in the game
+    - Spears now point down, and are thinner
+    - Rods are now straighter
+    - Every tool is now more visually distinct
+- Moved spears to a different part of the pond
+- Changed research xp scaling
+- Rebalanced a lot of items to account for research xp change
+    - Maple Rod cost 500 > 480, roll 30-120 > 25-120
+    - Bamboo Rod cost 950 > 900, roll 60-200 > 60-190
+    - Bronze Spear roll 60-350 > 60-300
+
+Bugfixes
+- Fishing cooldown can no longer be bypassed with save/load abuse
+- Tools can now roll their lowest catch amount (this effectively decreases the lower bound for catch quantity by 1 for all tools)
+- "Fish caught on average" stat now takes into account chance to catch nothing (this also affects fish/s stat)
+- The highest-tier owned rod no longer incorrectly says "Selected!" when a save is loaded without that rod selected
+- You can no longer go to about:blank#blocked via the pond
+- Minor code optimizations
+
+
+
+=== v0.2 ===
+Date: 3 May 2023
+
+Additions
+- (very limited) Visuals!!!
+    - Unique sprites for each tool
+- New UI
+    - You can see what fish you've caught
+    - You can see some of your current tool's stats
+- You can now save with Ctrl-S (huge!)
+    - Note that this uses local storage, so if you clear it your save will be GONE!!!
+    - More permanent saving method coming soon (tm)
+- New fishing options (including spears)
+- Research system to unlock new tools
+- A shop (no way??)
+
+Changes
+- More under-the-hood rewrites (i missed a couple things last time)
+- You now click on the pond to fish
+- Forced myself to learn how CSS flexbox works (in more formal terms, touched up some CSS)
+- Removed fishmaxxed
+- Removed unused activity log
+- Capitalized sell fish button
+- Nerfed the starting spear's cooldown massively
+- Many other small changes
+
+
+
+=== v0.11 ===
+Date: 14 April 2023
+
+Additions
+- Title
+
+Changes
+- Rewrote HTML, CSS and JS to be less esoteric (this happens every time)
+    - This includes splitting them into separate files
+- Rewrote fish generation
+- Changed the name and sell price of several fish
+- Fish are now obtained at the beginning of the cooldown
+- Removed :3
+
+
+
+=== v0.1 ===
+Date: 12 April 2023
+
+Additions
+- Fishing rod
+    - Cooldown
+- Selling
+- Action log
+- :3
+
+~~~~~~~~ THE BEGINNING ~~~~~~~~

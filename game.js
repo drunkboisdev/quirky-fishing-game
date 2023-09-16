@@ -1,7 +1,8 @@
 "use strict"
 
-const internalVer = "2023.09.05.01"; // track number of commits kinda? except not really because i forget sometimes (also git just does it for you)
-let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 500, numAccuracy = 1, curTool = "woodenSpear";
+const internalVer = "2023.09.13.01"; // track number of commits kinda? except not really because i forget sometimes (also git just does it for you)
+let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 500, numAccuracy = 1, curTool = "woodenSpear"; // game vars
+let totalFish = 0, moneySpent = 0, totalResXp = 0, saveFileStarted; // random tracking vars
 const fishList = new Map(), toolList = new Map();
 
 // helper functions woohoo
@@ -30,7 +31,7 @@ class Fish {
 }
 
 class Tool {
-    constructor(name, minRoll, rollRange, minCatch, catchRange, cooldown, cost, unlocked, owned, buyFunc) {
+    constructor(name, minRoll, rollRange, minCatch, catchRange, cooldown, cost, buyFunc, unlocked, owned) {
         this.name = name;
         this.minRoll = minRoll;
         this.rollRange = rollRange;
@@ -38,12 +39,13 @@ class Tool {
         this.catchRange = catchRange;
         this.cooldown = cooldown;
         this.cost = cost;
-        this.unlocked = unlocked;
-        this.owned = owned;
         this.buyFunc = buyFunc;
+        unlocked ? this.unlocked = unlocked : this.unlocked = false;
+        owned ? this.owned = owned : this.owned = false;
     }
     buy() {
         if (!this.owned && money >= this.cost) {
+            moneySpent += this.cost;
             money -= this.cost;
             this.owned = true;
             this.buyFunc();
@@ -70,7 +72,7 @@ const researchCentre = {
     cost: 300,
     get() {
         this.tier++;
-        this.cost = 300 * 3 ** (this.tier * 3);
+        this.cost = 300 * 10 ** (this.tier);
         $("resCentreButton").innerHTML = `Tier ${this.tier+1} research centre`
         document.querySelector("#research .buyButton p[name='price']").innerHTML = `$${this.cost}`;
     },
@@ -92,16 +94,19 @@ fishList.set("salmon", new Fish("salmon", 18, 0, 6));
 fishList.set("eel", new Fish("eel", 20, 0, 7, true));
 fishList.set("basa", new Fish("basa", 25, 0, 8));
 
-toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 30, 1, 1, 8, 0, true, true, () => { $("woodenSpearPrice").innerHTML = "Owned" }));
-toolList.set("flintSpear", new Tool("Flint Spear", 5, 80, 2, 1, 7.5, 80, true, false, () => { $("flintSpearPrice").innerHTML = "Owned" }));
-toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 2, 2, 6, 350, false, false, () => { $("copperSpearPrice").innerHTML = "Owned" }));
-toolList.set("bronzeSpear", new Tool("Bronze Spear", 60, 240, 4, 1, 5, 1200, false, false, () => { $("bronzeSpearPrice").innerHTML = "Owned" }));
-toolList.set("steelSpear", new Tool("Steel Spear", 140, 510, 4, 2, 4.5, 8800, false, false, () => { $("steelSpearPrice").innerHTML = "Owned" }));
-toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 2, 4, 150, false, false, () => { $("badRodPrice").innerHTML = "Owned" }));
-toolList.set("mapleRod", new Tool("Maple Rod", 25, 95, 2, 1, 3.8, 480, false, false, () => { $("mapleRodPrice").innerHTML = "Owned" }));
-toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 130, 2, 2, 3.6, 900, false, false, () => { $("bambooRodPrice").innerHTML = "Owned" }));
-toolList.set("graphRod", new Tool("Graphite Rod", 120, 400, 3, 2, 3.4, 3500, false, false, () => { $("graphRodPrice").innerHTML = "Owned" }));
-toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 570, 5, 2, 3.2, 15000, false, false, () => { $("fiberRodPrice").innerHTML = "Owned" }));
+toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 35, 1, 1, 8, 0, () => { $("woodenSpearPrice").innerHTML = "Owned" }), true, true);
+toolList.set("flintSpear", new Tool("Flint Spear", 10, 70, 2, 2, 7.5, 90, () => { $("flintSpearPrice").innerHTML = "Owned" }), true);
+toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 3, 1, 6, 420, () => { $("copperSpearPrice").innerHTML = "Owned" }));
+toolList.set("bronzeSpear", new Tool("Bronze Spear", 60, 240, 6, 2, 5, 1700, () => { $("bronzeSpearPrice").innerHTML = "Owned" }));
+toolList.set("steelSpear", new Tool("Steel Spear", 140, 510, 7, 2, 4.5, 11000, () => { $("steelSpearPrice").innerHTML = "Owned" }));
+toolList.set("nanoSpear", new Tool("Nano Spear", 200, 780, 12, 3, 4, 50000, () => { $("nanoSpearPrice").innerHTML = "Owned" }));
+
+toolList.set("badRod", new Tool("Makeshift Rod", 10, 60, 1, 1, 4, 130, () => { $("badRodPrice").innerHTML = "Owned" }));
+toolList.set("mapleRod", new Tool("Maple Rod", 25, 95, 2, 1, 3.8, 480, () => { $("mapleRodPrice").innerHTML = "Owned" }));
+toolList.set("bambooRod", new Tool("Bamboo Rod", 60, 130, 2, 2, 3.6, 900, () => { $("bambooRodPrice").innerHTML = "Owned" }));
+toolList.set("graphRod", new Tool("Graphite Rod", 110, 380, 4, 1, 3.4, 3000, () => { $("graphRodPrice").innerHTML = "Owned" }));
+toolList.set("fiberRod", new Tool("Fiberglass Rod", 180, 580, 5, 1, 3.2, 13000, () => { $("fiberRodPrice").innerHTML = "Owned" }));
+toolList.set("nanoRod", new Tool("Nano Rod", 300, 900, 7, 2, 3, 50000, () => { $("nanoRodPrice").innerHTML = "Owned" }))
 //toolList.set("devTool", new Tool("???", 0, 300, 11, 11, 0.2, 64, false, true, () => { console.log("hello there.") }));
 
 function findToolName(name) {
@@ -182,7 +187,7 @@ function catchFish() {
     for (let i = 0; i < fishList.size; i++) { newFish[i] = 0; }
 
     for (let i = 0; i < roll.length; i++) {
-        //console.log(roll[i]);
+        totalFish++;
         switch (roll[i]) {
             case "perch":
                 newFish[0]++;
@@ -210,7 +215,9 @@ function catchFish() {
                 break;
         }
         if (researchCentre.tier !== 0 && roll[i] !== "nothing") {
-            researchXp += fishList.get(roll[i]).tier ** 2 + 9 * researchCentre.tier ** 3;
+            const nextResXp = fishList.get(roll[i]).tier ** 2 + 9 * researchCentre.tier ** 3;
+            researchXp += nextResXp;
+            totalResXp += nextResXp;
 
             if (researchXp >= nextResearchReq) {
                 researchXp -= nextResearchReq;
@@ -318,8 +325,13 @@ function increaseResearchTier(showBox = false) {
             toolList.get("fiberRod").unlock();
             researchContent = "<li>Fiberglass Rod</li>";
             break;
+        case 7:
+            toolList.get("nanoSpear").unlock();
+            toolList.get("nanoRod").unlock();
+            researchContent = "<li>Nano Spear</li><li>Nano Rod</li>";
+            break;
         default:
-            researchContent = "<li>Nothing...</li><li>If you haven't already, I recommend going outside</li>";
+            researchContent = "<li>Nothing :(</li>";
     }
     if (document.querySelector(".resResult") !== null) {
         document.querySelector("#middleSection").removeChild(document.querySelector(".resResult"));
@@ -385,7 +397,7 @@ function init() {
 
         for (let j = 0; j < shopTools.length; j++) { shopTools[j].addEventListener("click", selectTool(shopTools[j].id)); }
     }
-    $("researchCentre").addEventListener("click", researchCentre.buy());
+    $("researchCentre").addEventListener("click", () => {researchCentre.buy()});
 
     updateToolInfo();
     updateFishList();
@@ -417,6 +429,7 @@ function wipeSave() { // fix this later
 
     localStorage.clear();
     currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 600, numAccuracy = 1;
+    totalFish = 0, moneySpent = 0, totalResXp = 0;
     researchCentre.tier = 0;
     fishList.forEach((v) => { v.quantity = 0; })
     toolList.forEach((v) => {
@@ -432,6 +445,8 @@ function wipeSave() { // fix this later
         if (spearButtons[i].id !== "flintSpear" || spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
     }
     for (let i = 0; i < rodButtons.length; i++) { $("rodContent").removeChild(rodButtons[i]); }
+    $("flintSpearPrice").innerHTML = "$80"
+
     $("resCentreButton").innerHTML = "Research centre";
     document.querySelector("p[name='price']").innerHTML = "$300";
     if ($("researchDisp") !== null) { $("research").removeChild($("researchDisp")); }
@@ -467,9 +482,18 @@ function loadSave() {
             if (toolList.get(t).owned) { selectTool(t); }
         }
         for (const f in o.fish) { fishList.get(f).quantity = o.fish[f]; }
+
         selectTool(o.curTool);
         fishStart = o.cdstart;
-        fishingTimer = toolList.get(curTool).cooldown * 1000 - (new Date().getTime() - o.cdstart)   
+        fishingTimer = toolList.get(curTool).cooldown * 1000 - (new Date().getTime() - o.cdstart);
+
+        // store stats
+        totalFish = o.lifetimeFish;
+        moneySpent = o.moneySpent;
+        totalResXp = o.lifetimeResXp;
+        saveFileStarted = o.saveStart;
+    } else {
+        saveFileStarted = new Date().getTime();
     }
 }
 
@@ -488,7 +512,7 @@ function createSave() {
         if (i < fishList.size - 1) { saveText += "," };
         i++;
     })
-    saveText += `},"curTool":"${curTool}","cd":${fishingTimer},"cdstart":${fishStart}}`;
+    saveText += `},"curTool":"${curTool}","cd":${fishingTimer},"cdstart":${fishStart},"lifetimeFish":${totalFish},"moneySpent":${moneySpent},"lifetimeResXp":${totalResXp},"saveStart":${saveFileStarted}}`;
     localStorage.setItem("save", btoa(saveText));
 
     const save = dialogBox("saveBox", null, "Game saved!");
@@ -538,8 +562,7 @@ function exampleSave() {
     createSave();
 }
 
+function check() { return [totalFish, moneySpent, totalResXp, saveFileStarted]; }
+
 // alright lets get this show started
 addEventListener("load", init);
-
-// save file lmao
-// eyJtb25leSI6OTAwLCJzZXR0aW5ncyI6eyJudW1BY2MiOjJ9LCJyZXMiOnsieHAiOjU0MzUsInRpZXIiOjMsImNlbnRyZVRpZXIiOjF9LCJ0b29sc093bmVkIjp7Indvb2RlblNwZWFyIjp0cnVlLCJmbGludFNwZWFyIjp0cnVlLCJjb3BwZXJTcGVhciI6dHJ1ZSwiYnJvbnplU3BlYXIiOnRydWUsInN0ZWVsU3BlYXIiOmZhbHNlLCJiYWRSb2QiOnRydWUsIm1hcGxlUm9kIjp0cnVlLCJiYW1ib29Sb2QiOnRydWUsImdyYXBoUm9kIjpmYWxzZSwiZmliZXJSb2QiOmZhbHNlfSwiZmlzaCI6eyJwZXJjaCI6MCwicHJhd24iOjEsImNhdGZpc2giOjE3LCJ3aGl0ZWZpc2giOjE1LCJ3YWxsZXllIjoxNywic2FsbW9uIjowLCJlZWwiOjAsImJhc2EiOjB9LCJjdXJUb29sIjoiYnJvbnplU3BlYXIiLCJjZCI6LTYyNDEyNSwiY2RzdGFydCI6MTY5NDU2NzEyMTQyN30=

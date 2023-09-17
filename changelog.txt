@@ -8,6 +8,7 @@ Additions
 - A changelog accessible directly from the site (the one you're reading right now)
 - New research centre tiers!
     - Higher-tier research centres allow you to research much faster
+- Nano-Tier Rods and Spears
 
 Changes
 - Optimized/rewrote code (for the fourth time in a row)
@@ -19,7 +20,7 @@ Changes
 - Saves are now stored differently
     - Unfortunately, this means your old save is now invalid
 - Certain stats are now tracked in your save file
-- Changed the version numbering system used (again this is the last one i swear)
+- Changed the version numbering system used (this is the last one i swear)
 - Reduced chance of catching nothing
 - Delete save option now deletes it instantly
     - A dialog now appears to confirm if you really want to delete your save
@@ -37,10 +38,6 @@ Bugfixes
 - Fishing cooldown is now calculated properly (i.e. the timer counts down even while tabbed out)
 - Research level up popup no longer says "undefined" when there are no rewards for that level
 - UI now behaves MUCH better when window is resized
-
-PLANNED:
-Additions
-- New tool tier
 
 
 

@@ -1,7 +1,7 @@
 "use strict"
 
 const internalVer = "2023.09.13.01"; // track number of commits kinda? except not really because i forget sometimes (also git just does it for you)
-let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 500, numAccuracy = 1, curTool = "woodenSpear"; // game vars
+let currentFish = "", fishingTimer = 0, fishStart = 0, money = 0, researchTier = 0, researchXp = 0, nextResearchReq = 500, numAccuracy = 1, curTool = "woodenSpear", curCooldown; // game vars
 let totalFish = 0, moneySpent = 0, totalResXp = 0, saveFileStarted; // random tracking vars
 const fishList = new Map(), toolList = new Map();
 
@@ -166,13 +166,8 @@ function catchFish() {
 
     rodSpr.src = `assets/tools/${curTool}.png`;
 
-    if (curTool.includes("Spear")) {
-        rodSpr.style.bottom = "29px";
-        rodSpr.style.right = "0px";
-    } else if (curTool.includes("Rod")) {
-        rodSpr.style.top = "600px";
-        rodSpr.style.left = "360px";
-    }
+    rodSpr.style.bottom = "29px";
+    rodSpr.style.right = "0px";
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1));
@@ -243,12 +238,14 @@ function catchFish() {
 function gameLoop() {
     // update fishing timer
     const msElapsed = new Date().getTime() - fishStart;
-    if (msElapsed < toolList.get(curTool).cooldown * 1000) { $("timer").innerHTML = `Wait ${(toolList.get(curTool).cooldown - msElapsed / 1000).toFixed(numAccuracy)} seconds before casting again.`; }
+    if (msElapsed < curCooldown * 1000) {
+        $("timer").innerHTML = `Wait ${(curCooldown - msElapsed / 1000).toFixed(numAccuracy)} seconds before casting again.`;
+    }
     else {
         $("timer").innerHTML = `Ready to cast!`;
         document.querySelector("#rod").style.visibility = "hidden";
     }
-    fishingTimer = toolList.get(curTool).cooldown * 1000 - msElapsed;
+    fishingTimer = curCooldown * 1000 - msElapsed;
 
     // update other things
     updateFishList();
@@ -259,6 +256,7 @@ function gameLoop() {
 
 function fish() {
     if (fishingTimer <= 0) {
+        curCooldown = toolList.get(curTool).cooldown;
         catchFish();
         fishStart = new Date().getTime();
     }
@@ -398,6 +396,8 @@ function init() {
         for (let j = 0; j < shopTools.length; j++) { shopTools[j].addEventListener("click", selectTool(shopTools[j].id)); }
     }
     $("researchCentre").addEventListener("click", () => {researchCentre.buy()});
+
+    curCooldown = toolList.get(curTool).cooldown;
 
     updateToolInfo();
     updateFishList();

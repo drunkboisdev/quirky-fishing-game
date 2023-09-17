@@ -1,12 +1,16 @@
 === v1.0 ALPHA - "Quick Fixes" ===
+Date: 17 September 2023
+
 Bugfixes
 - Flint Spear now shows the proper price
 - Tools no longer disappear after reloading a save with the tool active
-- 
-
-Planned:
-- Fix stray pixels
-- Fix Makeshift Rod's sprite
+- Fixed a lot of stray pixels
+- Slightly modified the sprites of the following tools:
+    - Graphite Rod
+    - Fiberglass Rod
+    - Nano Spear
+    - Nano Rod
+- Makeshift Rod is no longer twice the resolution of every other tool
 
 
 

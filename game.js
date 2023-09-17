@@ -370,6 +370,7 @@ function selectTool(item) {
 }
 
 function init() {
+    toolList.get("flintSpear").unlock();
     loadSave();
 
     document.addEventListener("keydown", e => {
@@ -379,7 +380,6 @@ function init() {
             createSave();
         } if (e.key === "Tab") { e.preventDefault(); }
     })
-    toolList.get("flintSpear").unlock();
     
     $("middleSection").addEventListener("click", fish);
     $("sellButton").addEventListener("click", sell);

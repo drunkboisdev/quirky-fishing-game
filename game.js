@@ -56,6 +56,7 @@ class Tool {
         const div = document.createElement("div");
         div.className = "buyButton";
         div.id = `${findToolName(this.name)}`;
+
         div.addEventListener("click", () => { selectTool(findToolName(this.name)) });
         div.innerHTML = `<p>${this.name}</p><p id=${findToolName(this.name)}Price>$${this.cost}</p>`;
 
@@ -95,7 +96,7 @@ fishList.set("eel", new Fish("eel", 20, 0, 7, true));
 fishList.set("basa", new Fish("basa", 25, 0, 8));
 
 toolList.set("woodenSpear", new Tool("Wooden Spear", 0, 35, 1, 1, 8, 0, () => { $("woodenSpearPrice").innerHTML = "Owned" }), true, true);
-toolList.set("flintSpear", new Tool("Flint Spear", 10, 70, 2, 2, 7.5, 90, () => { $("flintSpearPrice").innerHTML = "Owned" }), true);
+toolList.set("flintSpear", new Tool("Flint Spear", 10, 70, 2, 2, 7.5, 90, () => { $("flintSpearPrice").innerHTML = "Owned" }));
 toolList.set("copperSpear", new Tool("Copper Spear", 20, 130, 3, 1, 6, 420, () => { $("copperSpearPrice").innerHTML = "Owned" }));
 toolList.set("bronzeSpear", new Tool("Bronze Spear", 60, 240, 6, 2, 5, 1700, () => { $("bronzeSpearPrice").innerHTML = "Owned" }));
 toolList.set("steelSpear", new Tool("Steel Spear", 140, 510, 7, 2, 4.5, 11000, () => { $("steelSpearPrice").innerHTML = "Owned" }));
@@ -162,12 +163,9 @@ function catchFish() {
     let catchAmount = Math.floor(Math.random() * (toolList.get(curTool).catchRange + 1) + toolList.get(curTool).minCatch);
     let af = $("addFish");
     af.innerHTML = "";
-    const rodSpr = document.querySelector("#rod");
+    const rodSpr = $("rod");
 
     rodSpr.src = `assets/tools/${curTool}.png`;
-
-    rodSpr.style.bottom = "29px";
-    rodSpr.style.right = "0px";
 
     for (let i = 0; i < catchAmount; i++) {
         roll.push(Math.floor(Math.random() * toolList.get(curTool).rollRange + toolList.get(curTool).minRoll + 1));
@@ -243,7 +241,7 @@ function gameLoop() {
     }
     else {
         $("timer").innerHTML = `Ready to cast!`;
-        document.querySelector("#rod").style.visibility = "hidden";
+        $("rod").style.visibility = "hidden";
     }
     fishingTimer = curCooldown * 1000 - msElapsed;
 
@@ -381,6 +379,7 @@ function init() {
             createSave();
         } if (e.key === "Tab") { e.preventDefault(); }
     })
+    toolList.get("flintSpear").unlock();
     
     $("middleSection").addEventListener("click", fish);
     $("sellButton").addEventListener("click", sell);
@@ -441,11 +440,10 @@ function wipeSave() { // fix this later
     const spearButtons = document.querySelectorAll("#spearContent .buyButton");
     const rodButtons = document.querySelectorAll("#rodContent .buyButton"); // idk maybe this could go into 1 line but whatever im tired
 
-    for (let i = 2; i < spearButtons.length; i++) {
-        if (spearButtons[i].id !== "flintSpear" || spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
+    for (let i = 1; i < spearButtons.length; i++) {
+        if (spearButtons[i].id !== "woodenSpear") { $("spearContent").removeChild(spearButtons[i]); }
     }
     for (let i = 0; i < rodButtons.length; i++) { $("rodContent").removeChild(rodButtons[i]); }
-    $("flintSpearPrice").innerHTML = "$80"
 
     $("resCentreButton").innerHTML = "Research centre";
     document.querySelector("p[name='price']").innerHTML = "$300";
@@ -492,6 +490,11 @@ function loadSave() {
         moneySpent = o.moneySpent;
         totalResXp = o.lifetimeResXp;
         saveFileStarted = o.saveStart;
+
+        if (fishingTimer > 0) {
+            $("rod").src = `assets/tools/${curTool}.png`;
+            $("rod").style.visibility = "visible";
+        }
     } else {
         saveFileStarted = new Date().getTime();
     }

@@ -35,6 +35,8 @@ button {
 
 #rod {
     position: absolute;
+    bottom: 29px;
+    right: 0px;
     visibility: hidden;
 }
 

@@ -1,3 +1,15 @@
+=== v1.0 ALPHA - "Quick Fixes" ===
+Bugfixes
+- Flint Spear now shows the proper price
+- Tools no longer disappear after reloading a save with the tool active
+- 
+
+Planned:
+- Fix stray pixels
+- Fix Makeshift Rod's sprite
+
+
+
 === v1.0 ALPHA - "REWRITE" ===
 Date: 16 September 2023
 
